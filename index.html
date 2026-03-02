@@ -1,0 +1,1368 @@
+    <!DOCTYPE html>
+    <html lang="ja">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MC Action Tracker 2627</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+    :root {
+    --bg:      #F3F4F7;
+    --bg2:     #EAEBF0;
+    --border:  #CACCD1;
+    --text:    #52565E;
+    --dim:     #8A8E96;
+    --faint:   #CACCD1;
+    --white:   #ffffff;
+    --dark:    #2e3138;
+    --done:    #00C16E;
+    --done-bg: #E5F9F0;
+    --wip:     #F48924;
+    --wip-bg:  #FEF3E8;
+    --ns-bg:   #F3F4F7;
+    --danger:  #F85A40;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html{font-size:14px;}
+    body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-height:100vh;}
+    .app{display:flex;min-height:100vh;}
+
+    /* SIDEBAR */
+    .sidebar{width:200px;min-width:200px;position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;background:var(--dark);z-index:100;overflow-y:auto;}
+    .logo{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .logo-eye{font-size:8px;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:6px;}
+    .logo-title{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;color:#fff;letter-spacing:0.04em;}
+    .logo-sub{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,0.3);margin-top:5px;}
+    .nav{flex:1;padding-top:6px;}
+    .nav-label{font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:rgba(255,255,255,0.3);padding:10px 16px 4px;}
+    .nav-item{display:flex;align-items:center;padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700;gap:9px;color:rgba(255,255,255,0.55);transition:background 0.1s,color 0.1s;border-left:3px solid transparent;}
+    .nav-item:hover{background:rgba(255,255,255,0.07);color:#fff;}
+    .nav-item.active{background:rgba(255,255,255,0.1);color:#fff;}
+    .nav-item.active .nb{color:rgba(255,255,255,0.4);}
+    .ndot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+    .nb{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,0.28);}
+    .sidebar-foot{border-top:1px solid rgba(255,255,255,0.08);padding:12px;display:flex;flex-direction:column;gap:6px;}
+
+    /* TOPBAR */
+    .main{margin-left:200px;flex:1;}
+    .topbar{position:sticky;top:0;z-index:50;background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(82,86,94,0.06);}
+    .topbar-l{display:flex;align-items:center;gap:12px;}
+    .page-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.04em;color:var(--dark);line-height:1;}
+    .page-sub{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);}
+    .topbar-r{display:flex;align-items:center;gap:8px;}
+    .search-box{display:flex;align-items:center;gap:8px;border:1.5px solid var(--border);background:var(--bg);padding:6px 12px;border-radius:6px;transition:border-color 0.1s;}
+    .search-box:focus-within{border-color:var(--text);}
+    .search-box input{background:none;border:none;outline:none;color:var(--text);font-family:'Lato',sans-serif;font-size:12px;width:160px;}
+    .search-box input::placeholder{color:var(--faint);}
+    .btn{font-family:'Lato',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;padding:7px 16px;cursor:pointer;border:1.5px solid var(--border);background:var(--white);color:var(--text);border-radius:6px;transition:all 0.1s;}
+    .btn:hover{border-color:var(--text);background:var(--bg);}
+    .btn-fill{background:var(--dark);color:#fff;border-color:var(--dark);}
+    .btn-fill:hover{background:#3d4350;border-color:#3d4350;}
+
+    /* CONTENT */
+    .content{padding:28px;}
+
+    /* DASHBOARD */
+    .dash-hero{background:var(--dark);border-radius:10px;padding:28px 32px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;}
+    .dh-title{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:0.9;color:#fff;letter-spacing:0.04em;}
+    .dh-title span{color:#FFC845;}
+    .dh-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-top:10px;letter-spacing:0.06em;}
+    .dh-right{text-align:right;}
+    .dh-pct{font-family:'Bebas Neue',sans-serif;font-size:64px;line-height:1;color:#fff;}
+    .dh-pct-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:0.12em;text-transform:uppercase;}
+    .dh-total{font-size:11px;color:rgba(255,255,255,0.45);margin-top:4px;}
+    .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px;}
+    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:18px 20px;}
+    .stat-n{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;}
+    .stat-n.g{color:var(--done);} .stat-n.a{color:var(--wip);} .stat-n.d{color:var(--faint);}
+    .stat-l{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);margin-top:2px;}
+    .section-label{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim);margin-bottom:10px;}
+    .area-tbl{width:100%;border-collapse:collapse;background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:24px;}
+    .area-tbl th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.13em;color:var(--dim);text-align:left;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg);}
+    .area-tbl td{padding:13px 16px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    .area-tbl tr:last-child td{border-bottom:none;}
+    .area-tbl tbody tr{cursor:pointer;transition:background 0.08s;}
+    .area-tbl tbody tr:hover td{background:var(--bg);}
+    .an{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.04em;}
+    .prog-wrap{display:flex;align-items:center;gap:10px;}
+    .prog-track{height:4px;background:var(--bg2);border-radius:2px;width:100px;position:relative;}
+    .prog-fill{height:100%;border-radius:2px;position:absolute;left:0;top:0;}
+    .prog-n{font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:38px;}
+    .bdn{font-size:11px;color:var(--dim);font-family:'DM Mono',monospace;}
+    .gn{color:var(--done);} .an2{color:var(--wip);}
+    .up-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+    .up-head{grid-column:1/-1;background:var(--dark);color:#fff;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:11px 16px;}
+    .dl-card{padding:14px 16px;background:var(--white);cursor:default;}
+    .dl-card:hover{background:var(--bg);}
+    .dl-area{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim);margin-bottom:5px;}
+    .dl-task{font-size:13px;font-weight:700;margin-bottom:8px;line-height:1.4;}
+    .dl-foot{display:flex;align-items:center;gap:8px;}
+    .dl-date{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);}
+    .dl-date.ov{color:var(--danger);font-weight:700;}
+
+    /* CHIPS */
+    .chip{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:3px 9px;display:inline-flex;align-items:center;gap:5px;border-radius:4px;cursor:pointer;user-select:none;transition:opacity 0.1s;white-space:nowrap;border:none;}
+    .chip:hover{opacity:0.78;}
+    .chip.done{color:var(--done);background:var(--done-bg);}
+    .chip.wip{color:var(--wip);background:var(--wip-bg);}
+    .chip.ns{color:var(--dim);background:var(--ns-bg);}
+
+    /* FILTER BAR */
+    .fbar{display:flex;align-items:center;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+    .fl{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--dim);margin-right:4px;}
+    .fb{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:5px 12px;border:1.5px solid var(--border);cursor:pointer;background:var(--white);color:var(--dim);transition:all 0.08s;border-radius:5px;}
+    .fb:hover{border-color:var(--text);color:var(--text);}
+    .fb.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+    .fr{margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.04em;}
+
+    /* KPI BLOCK */
+    .kpi-block{background:var(--white);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;}
+    .kpi-head{display:flex;align-items:stretch;cursor:pointer;transition:background 0.08s;}
+    .kpi-head:hover{background:var(--bg);}
+    .kpi-idx{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1;width:64px;text-align:center;border-right:1px solid var(--border);padding:12px 0;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+    .kpi-info{flex:1;padding:12px 16px;}
+    .kpi-lbl{font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--faint);margin-bottom:3px;}
+    .kpi-ttl{font-size:13px;font-weight:700;line-height:1.4;color:var(--dark);}
+    .kpi-target{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin-top:3px;}
+    .kpi-r{padding:12px 16px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:6px;flex-shrink:0;}
+    .kpi-pct{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;}
+    .kpi-bar{width:80px;height:4px;background:var(--bg2);border-radius:2px;}
+    .kpi-bar-f{height:100%;border-radius:2px;}
+    .kpi-cnt{font-size:10px;color:var(--dim);}
+    .kpi-chev{width:40px;border-left:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:18px;transition:transform 0.14s;flex-shrink:0;}
+    .kpi-chev.open{transform:rotate(90deg);}
+
+    /* TASK TABLE */
+    .kpi-body{display:none;border-top:1px solid var(--border);}
+    .kpi-body.open{display:block;}
+    .tt{width:100%;border-collapse:collapse;}
+    .tt th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--dim);text-align:left;padding:8px 16px;border-bottom:1px solid var(--border);background:var(--bg);}
+    .tt td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:middle;}
+    .tr:last-child td{border-bottom:none;}
+    .tr:hover td{background:var(--bg);}
+    .tn{font-size:13px;font-weight:700;color:var(--dark);}
+    .tres{font-size:11px;color:var(--dim);}
+    .tdt{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);white-space:nowrap;}
+    .tdt.ov{color:var(--danger);font-weight:700;}
+    .ta{display:flex;gap:4px;opacity:0;transition:opacity 0.08s;}
+    .tr:hover .ta{opacity:1;}
+    .ib{font-size:11px;padding:4px 8px;border:1px solid var(--border);cursor:pointer;color:var(--dim);transition:all 0.08s;background:transparent;border-radius:4px;}
+    .ib:hover{border-color:var(--text);color:var(--text);}
+    .ib.del:hover{border-color:var(--danger);color:var(--danger);}
+    .add-r td{padding:9px 16px;border-bottom:none;}
+    .add-btn{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:0.1em;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:color 0.08s;background:none;border:none;}
+    .add-btn:hover{color:var(--text);}
+
+    /* ── GANTT ───────────────────────────────── */
+    .gantt-wrap{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+    .gantt-toolbar{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg);flex-wrap:wrap;}
+    .gantt-legend{display:flex;align-items:center;gap:14px;font-size:11px;font-weight:700;margin-right:auto;}
+    .gl-item{display:flex;align-items:center;gap:5px;}
+    .gl-dot{width:10px;height:10px;border-radius:2px;}
+    .gantt-filter{display:flex;align-items:center;gap:6px;}
+    .gfb{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:4px 10px;border:1.5px solid var(--border);cursor:pointer;background:var(--white);color:var(--dim);transition:all 0.08s;border-radius:4px;}
+    .gfb:hover{border-color:var(--text);color:var(--text);}
+    .gfb.active{background:var(--dark);color:#fff;border-color:var(--dark);}
+
+    .gantt-scroll{overflow-x:auto;}
+    .gantt-inner{min-width:800px;}
+
+    /* Grid */
+    .gantt-head{display:flex;position:sticky;top:56px;z-index:20;background:var(--bg);border-bottom:2px solid var(--border);}
+    .g-name-hd{width:260px;min-width:260px;padding:10px 16px;font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--dim);border-right:1px solid var(--border);flex-shrink:0;}
+    .g-res-hd{width:90px;min-width:90px;padding:10px 8px;font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:var(--dim);border-right:1px solid var(--border);flex-shrink:0;}
+    .g-timeline-hd{flex:1;display:flex;position:relative;}
+    .g-month-hd{flex:1;text-align:center;font-size:9px;font-weight:700;letter-spacing:0.1em;padding:10px 4px;color:var(--dim);border-right:1px solid var(--border);}
+
+    /* Area group header */
+    .g-area-row{display:flex;align-items:center;border-bottom:1px solid var(--border);}
+    .g-area-hd{width:260px;min-width:260px;padding:8px 16px;display:flex;align-items:center;gap:8px;border-right:1px solid var(--border);flex-shrink:0;}
+    .g-area-label{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.04em;}
+    .g-area-count{font-size:10px;font-weight:700;color:var(--dim);font-family:'DM Mono',monospace;}
+    .g-area-res{width:90px;min-width:90px;border-right:1px solid var(--border);flex-shrink:0;}
+    .g-area-chart{flex:1;position:relative;height:32px;}
+
+    /* Task row */
+    .g-row{display:flex;align-items:center;border-bottom:1px solid var(--border);min-height:38px;transition:background 0.07s;}
+    .g-row:hover{background:var(--bg);}
+    .g-row:last-child{border-bottom:none;}
+    .g-name{width:260px;min-width:260px;padding:7px 16px;font-size:12px;font-weight:700;color:var(--dark);border-right:1px solid var(--border);display:flex;align-items:center;gap:6px;overflow:hidden;flex-shrink:0;}
+    .g-name-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .g-res{width:90px;min-width:90px;padding:7px 8px;font-size:10px;color:var(--dim);border-right:1px solid var(--border);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;flex-shrink:0;}
+    .g-chart{flex:1;position:relative;height:38px;}
+    .g-grid{position:absolute;inset:0;display:flex;pointer-events:none;}
+    .g-grid-col{flex:1;border-right:1px solid var(--bg2);}
+    .g-bar-track{position:absolute;inset:0;display:flex;align-items:center;padding:0 2px;}
+    .g-bar{position:absolute;height:20px;border-radius:3px;display:flex;align-items:center;padding:0 7px;font-size:9px;font-weight:700;overflow:hidden;white-space:nowrap;color:#fff;transition:opacity 0.1s;}
+    .g-bar:hover{opacity:0.85;}
+    .g-bar.ns{color:var(--dim);}
+    .g-today{position:absolute;top:0;bottom:0;width:2px;z-index:5;pointer-events:none;background:#F85A40;opacity:0.7;}
+    .g-today-label{position:absolute;top:0;bottom:0;width:2px;background:#F85A40;z-index:10;pointer-events:none;}
+    .g-today-label::after{content:'TODAY';position:absolute;top:4px;left:4px;font-size:8px;font-weight:700;letter-spacing:0.1em;color:#F85A40;white-space:nowrap;}
+
+    /* No tasks row */
+    .g-empty{display:flex;align-items:center;border-bottom:1px solid var(--border);}
+    .g-empty-l{width:350px;min-width:350px;padding:10px 16px;font-size:11px;color:var(--faint);border-right:1px solid var(--border);}
+    .g-empty-r{flex:1;}
+
+    /* MODAL */
+    .overlay{position:fixed;inset:0;background:rgba(46,49,56,0.5);z-index:1000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+    .overlay.open{display:flex;}
+    .modal{background:var(--white);border:1px solid var(--border);border-radius:10px;width:460px;max-width:calc(100vw - 32px);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(46,49,56,0.2);animation:popIn 0.15s ease;}
+    @keyframes popIn{from{opacity:0;transform:scale(0.96) translateY(8px)}to{opacity:1;transform:none}}
+    .mh{background:var(--dark);color:#fff;padding:16px 20px;border-radius:10px 10px 0 0;font-size:14px;font-weight:900;letter-spacing:0.04em;text-transform:uppercase;}
+    .mb{padding:20px;}
+    .fg{margin-bottom:14px;}
+    .fl2{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--dim);margin-bottom:5px;}
+    .fi,.fs{width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--dark);font-size:13px;font-family:'Lato',sans-serif;padding:8px 11px;outline:none;transition:border-color 0.1s;border-radius:6px;}
+    .fi:focus,.fs:focus{border-color:var(--text);background:var(--white);}
+    .fs{cursor:pointer;}
+    option{background:var(--white);}
+    .fr2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .mf{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--bg);border-radius:0 0 10px 10px;}
+
+    /* TOAST */
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--dark);color:#fff;padding:10px 16px;font-size:12px;font-weight:700;z-index:2000;animation:slideUp 0.18s ease;border-radius:6px;box-shadow:0 4px 16px rgba(46,49,56,0.2);}
+    @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    .toast.err{background:var(--danger);}
+
+    ::-webkit-scrollbar{width:5px;height:5px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+    </style>
+    </head>
+    <body>
+    <div class="app">
+
+    <nav class="sidebar">
+    <div class="logo">
+        <div class="logo-eye">AIESEC Japan</div>
+        <div class="logo-title">ACTION<br>TRACKER</div>
+        <div class="logo-sub">MC 2627 · Feb→Sep</div>
+    </div>
+    <div class="nav">
+        <div>
+        <div class="nav-label">View</div>
+        <div class="nav-item" data-view="dashboard" onclick="sw('dashboard',this)"><div class="ndot" style="background:#fff;opacity:0.6"></div>ダッシュボード</div>
+        <div class="nav-item" data-view="gantt" onclick="sw('gantt',this)"><div class="ndot" style="background:#fff;opacity:0.6"></div>ガントチャート</div>
+        </div>
+        <div>
+        <div class="nav-label" style="margin-top:8px">エリア</div>
+        <div id="anav"></div>
+        </div>
+    </div>
+    <div class="sidebar-foot">
+        <button class="btn btn-fill" style="font-size:10px;padding:6px 10px" onclick="exportD()">↓ Export JSON</button>
+        <label class="btn" style="font-size:10px;padding:6px 10px;cursor:pointer;text-align:center;border-color:rgba(255,255,255,0.15);color:rgba(255,255,255,0.45);background:transparent">↑ Import<input type="file" accept=".json" style="display:none" onchange="importD(event)"></label>
+    </div>
+    </nav>
+
+    <main class="main">
+    <div class="topbar">
+        <div class="topbar-l">
+        <div class="page-title" id="ptitle">DASHBOARD</div>
+        <div class="page-sub" id="psub"></div>
+        </div>
+        <div class="topbar-r">
+        <div class="search-box">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--faint);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" placeholder="タスク検索 (⌘K)" id="si" oninput="applyF()">
+        </div>
+        <button class="btn btn-fill" id="addbtn" onclick="openAdd()">+ タスク追加</button>
+        <button class="btn" id="addkpibtn" onclick="openAddKpi()" style="display:none">+ KPI 追加</button>
+        </div>
+    </div>
+    <div class="content" id="ct"></div>
+    </main>
+    </div>
+
+    <div class="overlay" id="ov">
+    <div class="modal">
+        <div class="mh" id="mttl">タスク追加</div>
+        <div class="mb">
+        <div class="fg"><label class="fl2">タスク名</label><input class="fi" id="fn" placeholder="タスクを入力..."></div>
+        <div class="fr2">
+            <div class="fg"><label class="fl2">エリア</label><select class="fs" id="fa" onchange="updK()"></select></div>
+            <div class="fg"><label class="fl2">KPI</label><select class="fs" id="fk"></select></div>
+        </div>
+        <div class="fg"><label class="fl2">担当者</label><input class="fi" id="fr" placeholder="名前..."></div>
+        <div class="fr2">
+            <div class="fg"><label class="fl2">開始日</label><input class="fi" type="date" id="fs2"></div>
+            <div class="fg"><label class="fl2">締め切り</label><input class="fi" type="date" id="fd"></div>
+        </div>
+        <div class="fg"><label class="fl2">ステータス</label>
+            <select class="fs" id="fst">
+            <option value="NOT_STARTED">Not Started</option>
+            <option value="WIP">WIP</option>
+            <option value="DONE">DONE</option>
+            </select>
+        </div>
+        </div>
+        <div class="mf">
+        <button class="btn" onclick="closeM()">キャンセル</button>
+        <button class="btn btn-fill" onclick="saveT()">保存</button>
+        </div>
+    </div>
+    </div>
+
+    <!-- KPI MODAL -->
+    <div class="overlay" id="ov-kpi">
+    <div class="modal">
+        <div class="mh" id="kpi-mttl">KPI 追加</div>
+        <div class="mb">
+        <div class="fg"><label class="fl2">KPI 名</label><input class="fi" id="kn" placeholder="KPI名を入力..."></div>
+        <div class="fg"><label class="fl2">エリア</label><select class="fs" id="ka" ${''/* populated dynamically */}></select></div>
+        <div class="fr2">
+            <div class="fg"><label class="fl2">Target（目標値）</label><input class="fi" type="number" id="kt" placeholder="例: 100"></div>
+            <div class="fg"><label class="fl2">Actual（実績値）</label><input class="fi" type="number" id="kac" placeholder="例: 0"></div>
+        </div>
+        </div>
+        <div class="mf">
+        <button class="btn" id="kpi-del-btn" style="margin-right:auto;display:none;color:var(--danger);border-color:var(--danger)" onclick="delKpi()">削除</button>
+        <button class="btn" onclick="closeMKpi()">キャンセル</button>
+        <button class="btn btn-fill" onclick="saveKpi()">保存</button>
+        </div>
+    </div>
+    </div>
+
+    <script>
+    const COLORS={OGX:'#F85A40',ICX:'#0CB9C1',PD:'#037EF3',TMOD:'#F48924',BDF:'#7552CC',BnM:'#00C16E',LG:'#52565E',OPS:'#E9518A',GS:'#FFC845'};
+    const SK='aiesec2627v7';
+
+    const SEED={areas:[
+    {id:'OGX',name:'OGX',kpis:[
+        {id:'o1',name:'コース分けGV Realize #5',target:5,actual:1,tasks:[
+        {id:'t1',name:'Pilot LC募集＆組閣',res:'hinata',start:'2026-02-21',deadline:'2026-03-02',status:'WIP'},
+        {id:'t2',name:'Ghana OP引継ぎ',res:'hinata',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'t3',name:'Pilot LCのJDをfixする',res:'hinata',start:'2026-02-23',deadline:'2026-03-03',status:'WIP'},
+        {id:'t4',name:'PJT全体のTL立てる',res:'hinata',start:'2026-02-25',deadline:'',status:'WIP'},
+        {id:'t5',name:'OP候補出し',res:'hinata',start:'',deadline:'2026-03-03',status:'WIP'},
+        ]},
+        {id:'o2',name:'説明会→個別相談会 CVR 20%',target:20,actual:2,tasks:[
+        {id:'t6',name:'各会議体の位置づけ整理',res:'hinata',start:'2026-02-24',deadline:'',status:'DONE'},
+        {id:'t7',name:'3,4月callのアジェンダメイク',res:'hinata',start:'2026-02-26',deadline:'',status:'WIP'},
+        {id:'t8',name:'MConLCの形態を整備',res:'hinata',start:'',deadline:'2026-02-28',status:'DONE'},
+        {id:'t9',name:'MConLCのres振り',res:'hinata',start:'2026-02-25',deadline:'2026-02-27',status:'DONE'},
+        {id:'t10',name:'各LCへの伝達と日調',res:'hinata',start:'2026-02-26',deadline:'2026-02-28',status:'WIP'},
+        ]},
+        {id:'o3',name:'Premium AP Raise #125',target:125,actual:3,tasks:[
+        {id:'t11',name:'次期IRについて',res:'ryuta',start:'2026-02-24',deadline:'',status:'DONE'},
+        {id:'t12',name:'Kintoneレイアウト改善',res:'ryuta',start:'2026-03-01',deadline:'',status:'WIP'},
+        {id:'t13',name:'IR Callログ改善・フロー',res:'ryuta',start:'2026-03-01',deadline:'',status:'WIP'},
+        {id:'t14',name:'会期準備',res:'ryuta',start:'',deadline:'2026-03-25',status:'NOT_STARTED'},
+        {id:'t15',name:'LC内ロープレ資料作成',res:'ryuta',start:'',deadline:'2026-03-08',status:'NOT_STARTED'},
+        {id:'t16',name:'顧客懸念点解消資料作成',res:'ryuta',start:'',deadline:'2026-04-01',status:'NOT_STARTED'},
+        {id:'t17',name:'Screening項目fix',res:'hinata',start:'',deadline:'2026-02-28',status:'WIP'},
+        {id:'t18',name:'Feedback Form改善',res:'hinata',start:'',deadline:'2026-02-28',status:'WIP'},
+        {id:'t19',name:'fishのトラブル状況をGSSに整理',res:'hinata',start:'',deadline:'2026-03-14',status:'NOT_STARTED'},
+        {id:'t20',name:'Feedback Form回収',res:'hinata',start:'',deadline:'2026-03-15',status:'NOT_STARTED'},
+        {id:'t21',name:'Screeningの反映先(媒体)の調整',res:'hinata',start:'',deadline:'2026-03-14',status:'NOT_STARTED'},
+        {id:'t22',name:'Final改訂',res:'kanta',start:'2026-02-26',deadline:'2026-02-27',status:'DONE'},
+        {id:'t23',name:'問題作成',res:'kanta',start:'2026-02-28',deadline:'2026-03-06',status:'WIP'},
+        {id:'t24',name:'問題反映',res:'kanta',start:'2026-03-06',deadline:'2026-03-08',status:'NOT_STARTED'},
+        {id:'t25',name:'ライセンス開く',res:'kanta',start:'2026-03-08',deadline:'2026-03-13',status:'NOT_STARTED'},
+        ]},
+        {id:'o4',name:'行動意欲6以上のEP 85%',target:85,actual:4,tasks:[
+        {id:'t26',name:'AJ版STのupdate',res:'riko',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'t27',name:'impact reportの整備',res:'riko',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'t28',name:'directionかける',res:'riko',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'t29',name:'フェーズごとのCS役割の策定',res:'riko',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'t30',name:'LC フェーズに応じたコミュ設計',res:'riko',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'t31',name:'CS discussion space',res:'riko',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'t32',name:'Tierが高いLCとの位置付け調整',res:'riko',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'t33',name:'会期目的や位置づけの決定（事前）',res:'Moeha',start:'2026-02-23',deadline:'2026-02-18',status:'DONE'},
+        {id:'t34',name:'KGI,KPIの指標化,数値化',res:'Moeha',start:'2026-02-23',deadline:'2026-02-20',status:'WIP'},
+        {id:'t35',name:'WBSと詳細のTLの策定',res:'Riko',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'t36',name:'TLの修正',res:'Riko',start:'2026-02-23',deadline:'2026-03-25',status:'NOT_STARTED'},
+        {id:'t37',name:'会期KSFの特定',res:'Riko',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'t38',name:'会期のストーリーライン整理',res:'Riko',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'t39',name:'コンテンツストーリーをSs構成に落とし込む',res:'Riko',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'t40',name:'Ss内に含める情報とSs構成',res:'Riko',start:'2026-02-23',deadline:'2026-03-24',status:'NOT_STARTED'},
+        {id:'t41',name:'感情導線の設計',res:'Riko',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'t42',name:'conceptをビジュアルに落とし込む',res:'Creation',start:'2026-02-23',deadline:'2026-03-13',status:'NOT_STARTED'},
+        {id:'t43',name:'外部登壇者リスアプ',res:'BD',start:'2026-02-23',deadline:'2026-02-28',status:'NOT_STARTED'},
+        {id:'t44',name:'外部登壇者決定',res:'BD',start:'2026-02-23',deadline:'2026-03-25',status:'NOT_STARTED'},
+        {id:'t45',name:'登壇者との打ち合わせ',res:'Moeha',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'t46',name:'SFC作成',res:'Moeha',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'t47',name:'概観設計と合わせてVP共有',res:'Moeha',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'t48',name:'事前課題/SFC/感情設計のBU',res:'Moeha',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'t49',name:'上記の共有と調整Mtg',res:'Moeha',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'t50',name:'スライドマスターの納品',res:'Creation',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'t51',name:'スライドの完成',res:'Moeha',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'t52',name:'最終調整・バッファ',res:'Riko',start:'2026-02-23',deadline:'2026-04-22',status:'NOT_STARTED'},
+        {id:'t53',name:'リハーサルの実施',res:'Riko',start:'2026-02-23',deadline:'2026-04-22',status:'NOT_STARTED'},
+        {id:'t54',name:'mentorの要件定義・リスアプ',res:'Riko',start:'2026-02-23',deadline:'2026-03-21',status:'NOT_STARTED'},
+        {id:'t55',name:'募集（主に2425fish渡航者）',res:'Infra',start:'2026-02-23',deadline:'2026-03-25',status:'NOT_STARTED'},
+        {id:'t56',name:'人数確定し次第、参加者管理',res:'Infra',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'t57',name:'ニュースレターの原本を作成する',res:'Infra',start:'2026-02-23',deadline:'2026-04-04',status:'NOT_STARTED'},
+        {id:'t58',name:'EST紹介・Bookletの共有',res:'Infra',start:'2026-02-23',deadline:'2026-03-13',status:'NOT_STARTED'},
+        {id:'t59',name:'会期方向性をメンターと揃える機会の設計',res:'EST',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'t60',name:'上記の機会の実働',res:'EST',start:'2026-02-23',deadline:'2026-04-22',status:'NOT_STARTED'},
+        {id:'t61',name:'deleに事前課題の作成',res:'EST',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'t62',name:'会期準備をdeleに行わせる',res:'EST',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'t63',name:'XDを通じて各LCでの事前課題履行を徹底',res:'Riko',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'t64',name:'ハード予約',res:'Riko',start:'2026-02-23',deadline:'2026-03-19',status:'NOT_STARTED'},
+        {id:'t65',name:'名簿回収',res:'',start:'2026-02-23',deadline:'2026-03-20',status:'NOT_STARTED'},
+        {id:'t66',name:'行動予定表',res:'',start:'2026-02-23',deadline:'2026-03-21',status:'NOT_STARTED'},
+        {id:'t67',name:'書類3点セット提出',res:'',start:'2026-02-23',deadline:'2026-03-23',status:'NOT_STARTED'},
+        {id:'t68',name:'参加フォーム',res:'Infra',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'t69',name:'シークレットレターやらサプライズ企画のFix',res:'Creation',start:'2026-02-23',deadline:'2026-03-26',status:'NOT_STARTED'},
+        {id:'t70',name:'当日のmovie作成',res:'Creation',start:'2026-02-23',deadline:'2026-04-05',status:'NOT_STARTED'},
+        {id:'t71',name:'ロジ作成',res:'Infra',start:'2026-02-23',deadline:'2026-04-07',status:'NOT_STARTED'},
+        {id:'t72',name:'アンケ作成',res:'EST',start:'2026-02-23',deadline:'2026-04-14',status:'NOT_STARTED'},
+        {id:'t73',name:'オープンチャットの整備',res:'EST',start:'2026-02-23',deadline:'2026-04-17',status:'NOT_STARTED'},
+        {id:'t74',name:'Infra/Creation側ともすり合わせる',res:'Riko',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'t74b',name:'スレッドでオーダー回収',res:'Riko',start:'2026-02-23',deadline:'2026-04-19',status:'NOT_STARTED'},
+        {id:'tpa1',name:'【事後】会期目的や位置づけの決定',res:'Moeha',start:'2026-02-23',deadline:'2026-02-18',status:'DONE'},
+        {id:'tpa2',name:'【事後】KGI,KPIの指標化,数値化',res:'Moeha',start:'2026-02-23',deadline:'2026-02-20',status:'WIP'},
+        {id:'tpa3',name:'【事後】WBSと詳細のTLの策定',res:'Riko',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'tpa4',name:'【事後】TLの修正',res:'Riko',start:'2026-02-23',deadline:'2026-03-25',status:'NOT_STARTED'},
+        {id:'tpa5',name:'【事後】会期KSFの特定',res:'Riko',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'tpa6',name:'【事後】会期のストーリーライン整理',res:'Riko',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'tpa7',name:'【事後】コンテンツストーリーをSs構成に落とし込む',res:'Riko',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'tpa8',name:'【事後】Ss内に含める情報とSs構成',res:'Riko',start:'2026-02-23',deadline:'2026-03-24',status:'NOT_STARTED'},
+        {id:'tpa9',name:'【事後】感情導線の設計',res:'Riko',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'tpaa',name:'【事後】conceptをビジュアルに落とし込む',res:'Creation',start:'2026-02-23',deadline:'2026-03-13',status:'NOT_STARTED'},
+        {id:'tpab',name:'【事後】外部登壇者リスアプ',res:'BD',start:'2026-02-23',deadline:'2026-02-28',status:'NOT_STARTED'},
+        {id:'tpac',name:'【事後】外部登壇者決定',res:'BD',start:'2026-02-23',deadline:'2026-03-25',status:'NOT_STARTED'},
+        {id:'tpad',name:'【事後】登壇者との打ち合わせ',res:'Moeha',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'tpae',name:'【事後】SFC作成',res:'Moeha',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'tpaf',name:'【事後】概観設計と合わせてVP共有',res:'Moeha',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'tpag',name:'【事後】事前課題/SFC/感情設計のBU',res:'Moeha',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'tpah',name:'【事後】上記の共有と調整Mtg',res:'Moeha',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'tpai',name:'【事後】ハードへのオーダーはここまでに決める',res:'Moeha',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'tpaj',name:'【事後】スライドマスターの納品',res:'Creation',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'tpak',name:'【事後】スライドの完成',res:'Moeha',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'tpal',name:'【事後】最終調整・バッファ',res:'Riko',start:'2026-02-23',deadline:'2026-04-22',status:'NOT_STARTED'},
+        {id:'tpam',name:'【事後】リハーサルの実施',res:'Riko',start:'2026-02-23',deadline:'2026-04-22',status:'NOT_STARTED'},
+        {id:'tpan',name:'【事後】mentorの要件定義・リスアプ',res:'Riko',start:'2026-02-23',deadline:'2026-03-21',status:'NOT_STARTED'},
+        {id:'tpao',name:'【事後】募集（主に2425fish渡航者）',res:'Infra',start:'2026-02-23',deadline:'2026-03-25',status:'NOT_STARTED'},
+        {id:'tpap',name:'【事後】人数確定し次第、参加者管理',res:'Infra',start:'2026-02-23',deadline:'2026-04-11',status:'NOT_STARTED'},
+        {id:'tpaq',name:'【事後】ニュースレターの原本を作成する',res:'Infra',start:'2026-02-23',deadline:'2026-04-04',status:'NOT_STARTED'},
+        {id:'tpar',name:'【事後】EST紹介・Bookletの共有',res:'Infra',start:'2026-02-23',deadline:'2026-03-13',status:'NOT_STARTED'},
+        {id:'tpas',name:'【事後】会期方向性をメンターと揃える機会の設計',res:'EST',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'tpat',name:'【事後】上記の機会の実働',res:'EST',start:'2026-02-23',deadline:'2026-04-22',status:'NOT_STARTED'},
+        {id:'tpau',name:'【事後】deleに事前課題の作成',res:'EST',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'tpav',name:'【事後】会期準備をdeleに行わせる',res:'EST',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'tpaw',name:'【事後】XDを通じて各LCでの事前課題履行を徹底',res:'Riko',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'tpax',name:'【事後】ハード予約',res:'Riko',start:'2026-02-23',deadline:'2026-03-19',status:'NOT_STARTED'},
+        {id:'tpay',name:'【事後】名簿回収',res:'',start:'2026-02-23',deadline:'2026-03-20',status:'NOT_STARTED'},
+        {id:'tpaz',name:'【事後】行動予定表',res:'',start:'2026-02-23',deadline:'2026-03-21',status:'NOT_STARTED'},
+        {id:'tpb1',name:'【事後】書類3点セット提出',res:'',start:'2026-02-23',deadline:'2026-03-23',status:'NOT_STARTED'},
+        {id:'tpb2',name:'【事後】参加フォーム',res:'Infra',start:'2026-02-23',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'tpb3',name:'【事後】シークレットレターやらサプライズ企画のFix',res:'Creation',start:'2026-02-23',deadline:'2026-03-26',status:'NOT_STARTED'},
+        {id:'tpb4',name:'【事後】当日のmovie作成',res:'Creation',start:'2026-02-23',deadline:'2026-04-05',status:'NOT_STARTED'},
+        {id:'tpb5',name:'【事後】ロジ作成',res:'Infra',start:'2026-02-23',deadline:'2026-04-07',status:'NOT_STARTED'},
+        {id:'tpb6',name:'【事後】アンケ作成',res:'EST',start:'2026-02-23',deadline:'2026-04-14',status:'NOT_STARTED'},
+        {id:'tpb7',name:'【事後】オープンチャットの整備',res:'EST',start:'2026-02-23',deadline:'2026-04-17',status:'NOT_STARTED'},
+        {id:'tpb8',name:'【事後】Infra/Creation側ともすり合わせる',res:'Riko',start:'2026-02-23',deadline:'2026-04-18',status:'NOT_STARTED'},
+        {id:'tpb9',name:'【事後】スレッドでオーダー回収',res:'Riko',start:'2026-02-23',deadline:'2026-04-19',status:'NOT_STARTED'},
+        
+        ]},
+        {id:'o5',name:'7月時点でのLC資格審査項目抵触数 #0',target:0,actual:5,tasks:[
+        {id:'t75',name:'LCヒアリングによる課題分析',res:'aoi',start:'2026-03-10',deadline:'2026-03-16',status:'NOT_STARTED'},
+        {id:'t76',name:'LG作成ツールの理解/棲み分け確定',res:'aoi',start:'2026-03-10',deadline:'2026-03-16',status:'NOT_STARTED'},
+        {id:'t77',name:'形態の確定',res:'aoi',start:'2026-03-16',deadline:'2026-03-20',status:'NOT_STARTED'},
+        {id:'t78',name:'浸透設計',res:'aoi',start:'2026-03-16',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'t79',name:'使用状況の把握・改善点出し',res:'aoi',start:'2026-04-01',deadline:'',status:'NOT_STARTED'},
+        {id:'t80',name:'GRC call内容精査',res:'aoi',start:'2026-02-23',deadline:'2026-03-10',status:'NOT_STARTED'},
+        {id:'t81',name:'形態/対象者確定',res:'aoi',start:'2026-02-23',deadline:'2026-03-10',status:'NOT_STARTED'},
+        {id:'t82',name:'call後想定アクションの確定',res:'aoi',start:'2026-03-10',deadline:'2026-03-16',status:'NOT_STARTED'},
+        {id:'t83',name:'アクション履行チェック体制の整備',res:'aoi',start:'2026-03-16',deadline:'2026-03-23',status:'NOT_STARTED'},
+        ]},
+    ]},
+    {id:'ICX',name:'ICX',kpis:[
+        {id:'i1',name:'ヒアリング渉外数 #300',target:300,actual:3,tasks:[
+        {id:'i11',name:'sales 1on1（マネジメント）',res:'koyo/kazuaki',start:'2026-03-02',deadline:'2026-03-31',status:'WIP'},
+        {id:'i12',name:'sales 1on1（育成）',res:'koyo/kazuaki',start:'2026-06-15',deadline:'2026-08-15',status:'NOT_STARTED'},
+        {id:'i13',name:'sales 1on1（サポート）',res:'koyo/kazuaki',start:'2026-04-01',deadline:'',status:'NOT_STARTED'},
+        {id:'i14',name:'sales 1on1 カリキュラム作成',res:'koyo/kazuaki',start:'2026-03-02',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'i15',name:'課題作成',res:'koyo',start:'2026-03-09',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'i16',name:'課題（育成）フロー',res:'koyo',start:'2026-06-15',deadline:'2026-08-15',status:'NOT_STARTED'},
+        {id:'i17',name:'課題（サポート）フロー',res:'koyo',start:'2026-04-15',deadline:'',status:'NOT_STARTED'},
+        {id:'i18',name:'新規アポ方法策定',res:'koyo',start:'2026-04-01',deadline:'2026-06-26',status:'NOT_STARTED'},
+        ]},
+        {id:'i2',name:'渉外→Raise 9%',target:9,actual:2,tasks:[
+        {id:'i21',name:'【戦略策定対面機会】設計',res:'',start:'2026-02-20',deadline:'2026-03-30',status:'WIP'},
+        {id:'i21b',name:'【戦略策定対面機会】会期目的や位置づけの決定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21c',name:'【戦略策定対面機会】WBSと詳細のTLの策定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21d',name:'【戦略策定対面機会】会期KSFの特定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21e',name:'【戦略策定対面機会】日程決定・ハード予約',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21f',name:'【戦略策定対面機会】conceptをビジュアルに落とし込む',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21g',name:'【戦略策定対面機会】告知・参加アンケートフロー',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21h',name:'【戦略策定対面機会】参加者確定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21i',name:'【戦略策定対面機会】mentor確定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21j',name:'【戦略策定対面機会】登壇者リスアプ・決定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21k',name:'【戦略策定対面機会】SFC作成',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21l',name:'【戦略策定対面機会】スライドマスターの納品',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21m',name:'【戦略策定対面機会】スライドの完成',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21n',name:'【戦略策定対面機会】ワークシート完成',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i21o',name:'【戦略策定対面機会】アンケート作成・実施',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22',name:'【新入生セールス育成機会】設計',res:'',start:'2026-04-01',deadline:'2026-05-15',status:'NOT_STARTED'},
+        {id:'i22b',name:'【新入生セールス育成機会】会期目的や位置づけの決定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22c',name:'【新入生セールス育成機会】WBSと詳細のTLの策定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22d',name:'【新入生セールス育成機会】日程決定・ハード予約',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22e',name:'【新入生セールス育成機会】conceptをビジュアルに落とし込む',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22f',name:'【新入生セールス育成機会】告知・参加アンケートフロー',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22g',name:'【新入生セールス育成機会】参加者確定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22h',name:'【新入生セールス育成機会】SFC作成',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22i',name:'【新入生セールス育成機会】スライドの完成・ワークグル作成',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i22j',name:'【新入生セールス育成機会】アンケート作成・実施',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i23',name:'【夏反省戦略機会】設計',res:'',start:'2026-07-01',deadline:'2026-08-15',status:'NOT_STARTED'},
+        {id:'i23b',name:'【夏反省戦略機会】会期目的や位置づけの決定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i23c',name:'【夏反省戦略機会】WBSと詳細のTLの策定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i23d',name:'【夏反省戦略機会】日程決定・ハード予約',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i23e',name:'【夏反省戦略機会】conceptをビジュアルに落とし込む',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i23f',name:'【夏反省戦略機会】告知・参加アンケートフロー',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i23g',name:'【夏反省戦略機会】SFC作成・スライドの完成',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i23h',name:'【夏反省戦略機会】アンケート作成・実施',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i26',name:'DB意義定義',res:'koyo',start:'2026-03-02',deadline:'2026-03-31',status:'WIP'},
+        {id:'i27',name:'DB課題特定',res:'koyo',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i28',name:'DBマスト条件策定',res:'koyo',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i29',name:'DB完成',res:'koyo',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i2a',name:'KINTONE意義定義',res:'koyo',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i2b',name:'KINTONE課題特定',res:'koyo',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i2c',name:'KINTONE改善',res:'koyo',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i2d',name:'渉外後アンケート作成',res:'koyo',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i2e',name:'渉外後アンケートフロー',res:'koyo',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i2f',name:'EP情報集約シート作成',res:'yuto',start:'2026-03-02',deadline:'',status:'NOT_STARTED'},
+        {id:'i2g',name:'ドラフト作成',res:'yuto',start:'2026-03-15',deadline:'',status:'NOT_STARTED'},
+        {id:'i2h',name:'資料フロー',res:'yuto',start:'2026-03-31',deadline:'',status:'NOT_STARTED'},
+        {id:'i2i',name:'プロモイベント設計',res:'sasacchi',start:'2026-03-01',deadline:'2026-05-01',status:'NOT_STARTED'},
+        ]},
+        {id:'i3',name:'Raise→APD 90%',target:90,actual:3,tasks:[
+        {id:'i31',name:'2526 Mar. Func Call設計',res:'sasacchi',start:'2026-03-01',deadline:'',status:'NOT_STARTED'},
+        {id:'i32',name:'Matching Call設計',res:'sasacchi',start:'',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'i33',name:'Matching Manual作成',res:'sasacchi',start:'',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'i34',name:'IR 1on1',res:'sasacchi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i35',name:'一元化シート作成(現在+@)',res:'sasacchi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i36',name:'合同IR Call/Event',res:'sasacchi',start:'2026-03-01',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'i4',name:'地域セミナー開催数 #12',target:12,actual:4,tasks:[
+        {id:'i41',name:'セミナーマニュアル作成',res:'yuto',start:'',deadline:'2026-03-10',status:'DONE'},
+        {id:'i42',name:'SHアポ',res:'yuto',start:'',deadline:'2026-03-31',status:'DONE'},
+        {id:'i43',name:'SH確定',res:'yuto',start:'',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'i44',name:'広報開始',res:'yuto',start:'',deadline:'2026-05-15',status:'NOT_STARTED'},
+        {id:'i45',name:'使用媒体決定',res:'yuto',start:'',deadline:'2026-03-10',status:'NOT_STARTED'},
+        {id:'i46',name:'運用方針決定',res:'yuto',start:'',deadline:'2026-03-15',status:'NOT_STARTED'},
+        {id:'i47',name:'メーリス企業集め',res:'',start:'',deadline:'2026-03-15',status:'NOT_STARTED'},
+        {id:'i48',name:'linkedin開設',res:'',start:'',deadline:'2026-03-31',status:'NOT_STARTED'},
+        ]},
+        {id:'i5',name:'HP経由お問い合わせ数 #80',target:80,actual:5,tasks:[
+        {id:'i51',name:'実例集の発行#6',res:'mizuki',start:'',deadline:'',status:'DONE'},
+        {id:'i52',name:'HPの情報整理',res:'mizuki',start:'',deadline:'',status:'DONE'},
+        {id:'i53',name:'HPへの導線改善',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i54',name:'SEO記事配信#6',res:'mizuki',start:'',deadline:'',status:'DONE'},
+        {id:'i55',name:'ホワイトペーパー発信 #4',res:'mizuki',start:'',deadline:'',status:'DONE'},
+        ]},
+        {id:'i6',name:'OP NPS 推奨者率50%',target:50,actual:4,tasks:[
+        {id:'i61',name:'案件運営者育成機会①の設計',res:'ryu',start:'2026-03-01',deadline:'2026-04-04',status:'NOT_STARTED'},
+        {id:'i62',name:'案件運営者育成機会①日程確定・会場確保',res:'ryu',start:'2026-03-01',deadline:'2026-03-07',status:'NOT_STARTED'},
+        {id:'i63',name:'案件運営者育成機会①集客',res:'ryu',start:'2026-03-22',deadline:'2026-03-28',status:'NOT_STARTED'},
+        {id:'i64',name:'案件運営者育成機会①実施',res:'ryu',start:'2026-04-04',deadline:'2026-04-12',status:'NOT_STARTED'},
+        {id:'i65',name:'案件運営者育成機会②の設計',res:'ryu',start:'2026-08-03',deadline:'2026-09-27',status:'NOT_STARTED'},
+        {id:'i66',name:'案件運営者育成機会②実施',res:'ryu',start:'2026-09-19',deadline:'2026-09-27',status:'NOT_STARTED'},
+        {id:'i67',name:'Function callの設計・実施',res:'ryu',start:'2026-03-01',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'i68',name:'オペレーションごとの制度・マニュアル改善',res:'ryu',start:'2026-02-22',deadline:'2026-03-31',status:'WIP'},
+        {id:'i69',name:'受け入れ前OPセミナー①',res:'ryu',start:'2026-03-15',deadline:'2026-06-25',status:'NOT_STARTED'},
+        {id:'i6a',name:'受け入れ前OPセミナー②',res:'ryu',start:'2026-09-15',deadline:'2026-12-24',status:'NOT_STARTED'},
+        {id:'i6b',name:'EP向け事前課題の作成・オンラインテスト作成',res:'ryu',start:'2026-03-16',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'i6c',name:'EP向け事前inputツール整備・フロー',res:'ryu',start:'2026-03-16',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'i6d',name:'EPコンサル改善',res:'ryu',start:'2026-04-01',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'i6e',name:'研修修了アンケート修正',res:'ryu',start:'2026-02-04',deadline:'2026-03-21',status:'WIP'},
+        ]},
+        {id:'i7',name:'教育機関連携イベント #2',target:2,actual:4,tasks:[
+        {id:'i71',name:'パートナーリストアップ',res:'murasawa',start:'2026-03-01',deadline:'2026-03-20',status:'DONE'},
+        {id:'i72',name:'提案資料作成',res:'murasawa',start:'2026-03-01',deadline:'2026-03-31',status:'DONE'},
+        {id:'i73',name:'面談実施',res:'murasawa',start:'2026-04-01',deadline:'2026-04-30',status:'DONE'},
+        {id:'i74',name:'イベント設計',res:'murasawa',start:'2026-05-01',deadline:'2026-07-31',status:'NOT_STARTED'},
+        {id:'i75',name:'パートナー・EPへの取材',res:'murasawa',start:'2026-09-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        {id:'i76',name:'記事の執筆',res:'murasawa',start:'2026-09-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        {id:'i77',name:'過去の法務論点の整理',res:'murasawa',start:'2026-03-01',deadline:'2026-03-15',status:'NOT_STARTED'},
+        {id:'i78',name:'現状の法制度の分析',res:'murasawa',start:'2026-03-01',deadline:'2026-03-31',status:'NOT_STARTED'},
+        {id:'i79',name:'弁護士との相談',res:'murasawa',start:'2026-04-10',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'i7a',name:'取得していく資格の検討・決定',res:'murasawa',start:'2026-05-01',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'i8',name:'地方スタツア #2',target:2,actual:4,tasks:[
+        {id:'i81',name:'週次の1on1',res:'yuto',start:'',deadline:'2026-05-31',status:'DONE'},
+        {id:'i82',name:'コンセプト作成',res:'yuto',start:'2026-06-01',deadline:'',status:'NOT_STARTED'},
+        {id:'i83',name:'予算案決定',res:'yuto',start:'2026-06-01',deadline:'',status:'NOT_STARTED'},
+        {id:'i84',name:'セミナー開催',res:'',start:'2026-06-01',deadline:'',status:'DONE'},
+        {id:'i85',name:'訪問先決定',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i86',name:'アポ',res:'',start:'2026-08-01',deadline:'',status:'DONE'},
+        ]},
+        {id:'i9',name:'新規注力国関係するSHの開拓数 #3',target:3,actual:4,tasks:[
+        {id:'i91',name:'デスクトップリサーチ',res:'morisawa',start:'2026-02-26',deadline:'2026-03-16',status:'NOT_STARTED'},
+        {id:'i92',name:'諮問会用企画書執筆',res:'morisawa',start:'2026-03-03',deadline:'2026-03-16',status:'NOT_STARTED'},
+        {id:'i93',name:'諮問会のFB反映',res:'morisawa',start:'2026-03-23',deadline:'2026-03-27',status:'NOT_STARTED'},
+        {id:'i94',name:'面談日調と実施（リサーチのため）',res:'morisawa',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'i95',name:'渉外面談日調と実施（関係構築）',res:'morisawa',start:'2026-03-20',deadline:'2026-09-30',status:'NOT_STARTED'},
+        {id:'i96',name:'ヒアリングを踏まえた渉外資料作成',res:'morisawa',start:'2026-05-07',deadline:'2026-05-31',status:'NOT_STARTED'},
+        {id:'i97',name:'新規Raiseのための渉外実施',res:'morisawa',start:'2026-05-25',deadline:'2026-09-30',status:'NOT_STARTED'},
+        {id:'i98',name:'注力EYとのIR call日調',res:'morisawa/sasacchi',start:'2026-04-20',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'i99',name:'注力EYとのIR call実施',res:'morisawa/sasacchi',start:'2026-04-27',deadline:'2026-05-31',status:'NOT_STARTED'},
+        ]},
+        {id:'i10',name:'LC資格審査項目抵触 #0',target:0,actual:4,tasks:[
+        {id:'ia1',name:'案件運営者育成機会の設計・実施①',res:'ryu',start:'2026-03-01',deadline:'2026-04-05',status:'NOT_STARTED'},
+        {id:'ia2',name:'案件運営者育成機会の設計・実施②',res:'ryu',start:'2026-08-01',deadline:'2026-09-20',status:'NOT_STARTED'},
+        {id:'ia3',name:'オペレーションごとの制度・マニュアル改善',res:'ryu',start:'2026-02-22',deadline:'2026-03-31',status:'WIP'},
+        ]},
+    ]},
+    {id:'PD',name:'PD',kpis:[
+        {id:'p1',name:'KPI 1',target:5,actual:3,tasks:[
+        {id:'p11',name:'戦術apple がんばろっ',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p12',name:'戦術apple がんばろっ②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p13',name:'戦術bunny a',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p14',name:'戦術bunny b',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'p2',name:'KPI 2',target:0,actual:2,tasks:[
+        {id:'p21',name:'がんばろう①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p22',name:'がんばろう②',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'p23',name:'がんばろう③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'p3',name:'KPI 3',target:0,actual:3,tasks:[
+        {id:'p31',name:'ふぁいと①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p32',name:'ふぁいと②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p33',name:'ふぁいと③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'p34',name:'ふぁいと④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'p35',name:'ふぁいと⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'p4',name:'KPI 4',target:0,actual:4,tasks:[
+        {id:'p41',name:'応援してる①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p42',name:'応援してる②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p43',name:'応援してる③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'p44',name:'応援してる④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'p45',name:'応援してる⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'p5',name:'KPI 5',target:0,actual:5,tasks:[
+        {id:'p51',name:'Best of LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p52',name:'Best of LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p53',name:'Best of LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p54',name:'Best of LUCK④',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p55',name:'Best of LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'p6',name:'KPI 6',target:0,actual:4,tasks:[
+        {id:'p61',name:'GOOD LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p62',name:'GOOD LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p63',name:'GOOD LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'p64',name:'GOOD LUCK④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'p65',name:'GOOD LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+    ]},
+    {id:'TMOD',name:'TMOD',kpis:[
+        {id:'tm1',name:'MX Standards [1.2] 履行率 90% / 満足度平均 8.0',target:90,actual:1,tasks:[
+        {id:'tm11',name:'LC状況把握',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm12',name:'1on1で行ってほしい要件定義',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm13',name:'1on1のログフォーマットフロー',res:'Hidemi',start:'2026-02-25',deadline:'2026-02-27',status:'NOT_STARTED'},
+        {id:'tm14',name:'1on1のログシート回収',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm15',name:'1on1進捗確認シートのフォーマット思考',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm16',name:'o2o履行状況フォーマットフロー',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm17',name:'o2o履行状況フォーマット回収',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'tm2',name:'MX Standards [6.2] 履行率 90% / 満足度平均 8.0',target:90,actual:2,tasks:[
+        {id:'tm21',name:'360度FB遵守率向上①',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm22',name:'360度FB遵守率向上②',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm23',name:'360度FB遵守率向上③',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm24',name:'360度FB遵守率向上④',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm25',name:'360度FB遵守率向上⑤',res:'Hidemi',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'tm3',name:'AIESEC 共感度 #85%',target:85,actual:3,tasks:[
+        {id:'tm31',name:'LCにおけるEssence Ssの履行①',res:'miyu',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm32',name:'LCにおけるEssence Ssの履行②',res:'miyu',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm33',name:'LCにおけるEssence Ssの履行③',res:'miyu',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm34',name:'MC visitによるSs実施①',res:'miyu',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'tm35',name:'MC visitによるSs実施②',res:'miyu',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'tm4',name:'各LCでのOff-JT実施数の年間平均 #2',target:2,actual:4,tasks:[
+        {id:'tm41',name:'EST Open前思考',res:'sohki',start:'2026-02-21',deadline:'2026-02-23',status:'WIP'},
+        {id:'tm42',name:'EST Open',res:'sohki',start:'2026-02-23',deadline:'2026-02-24',status:'NOT_STARTED'},
+        {id:'tm43',name:'EST選考',res:'sohki',start:'2026-02-24',deadline:'2026-03-09',status:'NOT_STARTED'},
+        {id:'tm44',name:'EST Kickoff',res:'sohki',start:'2026-03-10',deadline:'2026-03-12',status:'NOT_STARTED'},
+        {id:'tm45',name:'Off-JTテーマ策定',res:'sohki',start:'2026-03-16',deadline:'2026-03-23',status:'NOT_STARTED'},
+        {id:'tm46',name:'Off-JT開発第一弾',res:'sohki',start:'2026-03-24',deadline:'2026-04-24',status:'NOT_STARTED'},
+        {id:'tm47',name:'第一弾お披露目',res:'sohki',start:'2026-04-30',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'tm48',name:'Off-JT開発第二弾',res:'sohki',start:'2026-05-14',deadline:'2026-06-30',status:'NOT_STARTED'},
+        {id:'tm49',name:'第二弾お披露目',res:'sohki',start:'2026-07-07',deadline:'2026-07-07',status:'NOT_STARTED'},
+        {id:'tm4a',name:'浸透＆改善＆ノウハウ共有期間',res:'sohki',start:'2026-05-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'tm5',name:'Leader MtgにおけるEB層の総参加者数 #40',target:40,actual:5,tasks:[
+        {id:'tm51',name:'Leader Mtg位置付け思考',res:'aoi',start:'2026-02-20',deadline:'2026-02-25',status:'WIP'},
+        {id:'tm52',name:'コンテンツ思考【叩き】',res:'aoi',start:'2026-02-25',deadline:'2026-02-27',status:'NOT_STARTED'},
+        {id:'tm53',name:'Leader Mtg ヒアリング',res:'aoi',start:'2026-02-28',deadline:'2026-03-06',status:'NOT_STARTED'},
+        {id:'tm54',name:'アナウンス事項整理（文面作成）',res:'aoi',start:'2026-03-11',deadline:'2026-03-13',status:'NOT_STARTED'},
+        {id:'tm55',name:'参加フォーム作成',res:'aoi',start:'2026-03-11',deadline:'2026-03-13',status:'NOT_STARTED'},
+        {id:'tm56',name:'アナウンス＠slack',res:'aoi',start:'2026-03-13',deadline:'2026-03-15',status:'NOT_STARTED'},
+        {id:'tm57',name:'参加後アンケート回収事項思考',res:'aoi',start:'2026-03-16',deadline:'2026-03-18',status:'NOT_STARTED'},
+        {id:'tm58',name:'参加後アンケート作成',res:'aoi',start:'2026-03-18',deadline:'2026-03-20',status:'NOT_STARTED'},
+        {id:'tm59',name:'#1 実施',res:'aoi',start:'2026-03-23',deadline:'2026-03-29',status:'NOT_STARTED'},
+        {id:'tm5a',name:'参加後アンケートフロー',res:'aoi',start:'2026-03-29',deadline:'2026-03-29',status:'NOT_STARTED'},
+        ]},
+        {id:'tm6',name:'Education Cycle (MX standard [2.3]) 質平均 8.0',target:8,actual:4,tasks:[
+        {id:'tm61',name:'アウトプットフレーム',res:'',start:'2026-02-24',deadline:'2026-02-27',status:'NOT_STARTED'},
+        {id:'tm62',name:'こーじろとの役割分担',res:'',start:'2026-02-27',deadline:'2026-02-27',status:'NOT_STARTED'},
+        {id:'tm63',name:'各々でアウトプット進める',res:'',start:'2026-02-27',deadline:'2026-03-18',status:'NOT_STARTED'},
+        {id:'tm64',name:'HRとの調整',res:'',start:'2026-03-07',deadline:'2026-03-14',status:'NOT_STARTED'},
+        {id:'tm65',name:'KSF特定',res:'',start:'2026-03-18',deadline:'2026-03-28',status:'NOT_STARTED'},
+        {id:'tm66',name:'関数を使って見やすく整理',res:'',start:'2026-03-28',deadline:'2026-03-30',status:'NOT_STARTED'},
+        {id:'tm67',name:'LC共有',res:'',start:'2026-04-01',deadline:'2026-04-01',status:'NOT_STARTED'},
+        {id:'tm68',name:'As isの回収とLCとの共有',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+    ]},
+    {id:'BDF',name:'BDF',kpis:[
+        {id:'b1',name:'KPI 1',target:2,actual:3,tasks:[
+        {id:'b11',name:'戦術apple がんばろっ',res:'',start:'2026-02-14',deadline:'2026-02-25',status:'DONE'},
+        {id:'b12',name:'戦術apple がんばろっ②',res:'',start:'2026-02-05',deadline:'2026-02-17',status:'DONE'},
+        {id:'b13',name:'戦術bunny①',res:'',start:'2026-03-01',deadline:'2026-04-30',status:'NOT_STARTED'},
+        {id:'b14',name:'戦術bunny②',res:'',start:'2026-05-01',deadline:'2026-07-31',status:'NOT_STARTED'},
+        ]},
+        {id:'b2',name:'KPI 2',target:3,actual:5,tasks:[
+        {id:'b21',name:'がんばろう①',res:'',start:'2026-03-01',deadline:'2026-05-31',status:'DONE'},
+        {id:'b22',name:'がんばろう②',res:'',start:'2026-04-01',deadline:'2026-06-30',status:'NOT_STARTED'},
+        {id:'b23',name:'がんばろう③',res:'',start:'2026-07-01',deadline:'2026-08-31',status:'NOT_STARTED'},
+        ]},
+        {id:'b3',name:'KPI 3',target:0,actual:3,tasks:[
+        {id:'b31',name:'ふぁいと①',res:'',start:'2026-02-01',deadline:'2026-03-31',status:'DONE'},
+        {id:'b32',name:'ふぁいと②',res:'',start:'2026-03-01',deadline:'2026-04-30',status:'DONE'},
+        {id:'b33',name:'ふぁいと③',res:'',start:'2026-05-01',deadline:'2026-07-31',status:'NOT_STARTED'},
+        ]},
+        {id:'b4',name:'KPI 4',target:0,actual:4,tasks:[
+        {id:'b41',name:'応援してる①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b42',name:'応援してる②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b43',name:'応援してる③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'b44',name:'応援してる④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'b5',name:'KPI 5',target:0,actual:5,tasks:[
+        {id:'b51',name:'Best of LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b52',name:'Best of LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b53',name:'Best of LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b54',name:'Best of LUCK④',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b55',name:'Best of LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'b6',name:'KPI 6',target:0,actual:4,tasks:[
+        {id:'b61',name:'GOOD LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b62',name:'GOOD LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b63',name:'GOOD LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'b64',name:'GOOD LUCK④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'b65',name:'GOOD LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+    ]},
+    {id:'BnM',name:'BnM',kpis:[
+        {id:'bn1',name:'KPI 1',target:5,actual:3,tasks:[
+        {id:'bn11',name:'戦術apple がんばろっ',res:'',start:'2026-02-01',deadline:'2026-03-31',status:'DONE'},
+        {id:'bn12',name:'戦術apple②',res:'',start:'2026-03-01',deadline:'2026-05-31',status:'DONE'},
+        {id:'bn13',name:'戦術bunny①',res:'',start:'2026-04-01',deadline:'2026-07-31',status:'NOT_STARTED'},
+        {id:'bn14',name:'戦術bunny②',res:'',start:'2026-06-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'bn2',name:'KPI 2',target:0,actual:2,tasks:[
+        {id:'bn21',name:'がんばろう①',res:'',start:'2026-02-01',deadline:'2026-04-30',status:'DONE'},
+        {id:'bn22',name:'がんばろう②',res:'',start:'2026-05-01',deadline:'2026-08-31',status:'NOT_STARTED'},
+        {id:'bn23',name:'がんばろう③',res:'',start:'2026-07-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'bn3',name:'KPI 3',target:0,actual:3,tasks:[
+        {id:'bn31',name:'ふぁいと①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn32',name:'ふぁいと②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn33',name:'ふぁいと③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'bn4',name:'KPI 4',target:0,actual:4,tasks:[
+        {id:'bn41',name:'応援してる①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn42',name:'応援してる②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn43',name:'応援してる③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'bn44',name:'応援してる④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'bn5',name:'KPI 5',target:0,actual:5,tasks:[
+        {id:'bn51',name:'Best of LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn52',name:'Best of LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn53',name:'Best of LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn54',name:'Best of LUCK④',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn55',name:'Best of LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'bn6',name:'KPI 6',target:0,actual:4,tasks:[
+        {id:'bn61',name:'GOOD LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn62',name:'GOOD LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn63',name:'GOOD LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'bn64',name:'GOOD LUCK④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'bn65',name:'GOOD LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+    ]},
+    {id:'LG',name:'LG',kpis:[
+        {id:'lg1',name:'KPI 1',target:5,actual:3,tasks:[
+        {id:'lg11',name:'戦術apple がんばろっ',res:'',start:'2026-02-01',deadline:'2026-03-31',status:'DONE'},
+        {id:'lg12',name:'戦術apple②',res:'',start:'2026-03-01',deadline:'2026-05-31',status:'DONE'},
+        {id:'lg13',name:'戦術bunny①',res:'',start:'2026-04-01',deadline:'2026-07-31',status:'NOT_STARTED'},
+        {id:'lg14',name:'戦術bunny②',res:'',start:'2026-06-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'lg2',name:'KPI 2',target:0,actual:2,tasks:[
+        {id:'lg21',name:'がんばろう①',res:'',start:'2026-02-01',deadline:'2026-04-30',status:'DONE'},
+        {id:'lg22',name:'がんばろう②',res:'',start:'2026-05-01',deadline:'2026-08-31',status:'NOT_STARTED'},
+        {id:'lg23',name:'がんばろう③',res:'',start:'2026-07-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'lg3',name:'KPI 3',target:0,actual:3,tasks:[
+        {id:'lg31',name:'ふぁいと①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg32',name:'ふぁいと②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg33',name:'ふぁいと③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'lg4',name:'KPI 4',target:0,actual:4,tasks:[
+        {id:'lg41',name:'応援してる①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg42',name:'応援してる②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg43',name:'応援してる③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'lg44',name:'応援してる④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'lg5',name:'KPI 5',target:0,actual:5,tasks:[
+        {id:'lg51',name:'Best of LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg52',name:'Best of LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg53',name:'Best of LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg54',name:'Best of LUCK④',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg55',name:'Best of LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'lg6',name:'KPI 6',target:0,actual:4,tasks:[
+        {id:'lg61',name:'GOOD LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg62',name:'GOOD LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg63',name:'GOOD LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'lg64',name:'GOOD LUCK④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'lg65',name:'GOOD LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+    ]},
+    {id:'OPS',name:'OPS',kpis:[
+        {id:'op1',name:'KPI 1',target:5,actual:3,tasks:[
+        {id:'op11',name:'戦術apple がんばろっ',res:'',start:'2026-02-01',deadline:'2026-03-31',status:'DONE'},
+        {id:'op12',name:'戦術apple②',res:'',start:'2026-03-01',deadline:'2026-05-31',status:'DONE'},
+        {id:'op13',name:'戦術bunny①',res:'',start:'2026-04-01',deadline:'2026-07-31',status:'NOT_STARTED'},
+        {id:'op14',name:'戦術bunny②',res:'',start:'2026-06-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'op2',name:'KPI 2',target:0,actual:2,tasks:[
+        {id:'op21',name:'がんばろう①',res:'',start:'2026-02-01',deadline:'2026-04-30',status:'DONE'},
+        {id:'op22',name:'がんばろう②',res:'',start:'2026-05-01',deadline:'2026-08-31',status:'NOT_STARTED'},
+        {id:'op23',name:'がんばろう③',res:'',start:'2026-07-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'op3',name:'KPI 3',target:0,actual:3,tasks:[
+        {id:'op31',name:'ふぁいと①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op32',name:'ふぁいと②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op33',name:'ふぁいと③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'op4',name:'KPI 4',target:0,actual:4,tasks:[
+        {id:'op41',name:'応援してる①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op42',name:'応援してる②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op43',name:'応援してる③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'op44',name:'応援してる④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'op5',name:'KPI 5',target:0,actual:5,tasks:[
+        {id:'op51',name:'Best of LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op52',name:'Best of LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op53',name:'Best of LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op54',name:'Best of LUCK④',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op55',name:'Best of LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'op6',name:'KPI 6',target:0,actual:4,tasks:[
+        {id:'op61',name:'GOOD LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op62',name:'GOOD LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op63',name:'GOOD LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'op64',name:'GOOD LUCK④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'op65',name:'GOOD LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+    ]},
+    {id:'GS',name:'GS',kpis:[
+        {id:'gs1',name:'KPI 1',target:5,actual:3,tasks:[
+        {id:'gs11',name:'戦術apple がんばろっ',res:'',start:'2026-02-01',deadline:'2026-03-31',status:'DONE'},
+        {id:'gs12',name:'戦術apple②',res:'',start:'2026-02-04',deadline:'2026-02-25',status:'WIP'},
+        {id:'gs13',name:'戦術bunny①',res:'',start:'2026-04-01',deadline:'2026-07-31',status:'NOT_STARTED'},
+        {id:'gs14',name:'戦術bunny②',res:'',start:'2026-06-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'gs2',name:'KPI 2',target:0,actual:2,tasks:[
+        {id:'gs21',name:'がんばろう①',res:'',start:'2026-02-01',deadline:'2026-04-30',status:'DONE'},
+        {id:'gs22',name:'がんばろう②',res:'',start:'2026-05-01',deadline:'2026-08-31',status:'NOT_STARTED'},
+        {id:'gs23',name:'がんばろう③',res:'',start:'2026-07-01',deadline:'2026-09-30',status:'NOT_STARTED'},
+        ]},
+        {id:'gs3',name:'KPI 3',target:0,actual:3,tasks:[
+        {id:'gs31',name:'ふぁいと①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs32',name:'ふぁいと②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs33',name:'ふぁいと③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'gs4',name:'KPI 4',target:0,actual:4,tasks:[
+        {id:'gs41',name:'応援してる①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs42',name:'応援してる②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs43',name:'応援してる③',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'gs44',name:'応援してる④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'gs5',name:'KPI 5',target:0,actual:5,tasks:[
+        {id:'gs51',name:'Best of LUCK①',res:'',start:'2026-02-04',deadline:'2026-02-25',status:'DONE'},
+        {id:'gs52',name:'Best of LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs53',name:'Best of LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs54',name:'Best of LUCK④',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs55',name:'Best of LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+        {id:'gs6',name:'KPI 6',target:0,actual:4,tasks:[
+        {id:'gs61',name:'GOOD LUCK①',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs62',name:'GOOD LUCK②',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs63',name:'GOOD LUCK③',res:'',start:'',deadline:'',status:'DONE'},
+        {id:'gs64',name:'GOOD LUCK④',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        {id:'gs65',name:'GOOD LUCK⑤',res:'',start:'',deadline:'',status:'NOT_STARTED'},
+        ]},
+    ]},
+    ]}
+
+    let D,view='dashboard',aid=null,fil='ALL',gfil='ALL',editing=null;
+    function load(){try{const s=localStorage.getItem(SK);if(s){D=JSON.parse(s);return;}}catch(e){}D=JSON.parse(JSON.stringify(SEED));}
+    function save(){try{localStorage.setItem(SK,JSON.stringify(D));}catch(e){}}
+    function gid(){return 'x'+Date.now()+'_'+Math.random().toString(36).slice(2,5);}
+    function h(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    function fd(s){if(!s)return'—';const d=new Date(s);if(isNaN(d))return s;return(d.getMonth()+1)+'/'+(d.getDate());}
+    function isOver(dl){if(!dl)return false;const d=new Date(dl);return !isNaN(d)&&d<new Date();}
+    function sl(s){return s==='DONE'?'Done':s==='WIP'?'WIP':'Not Started';}
+    function sc(s){return s==='DONE'?'done':s==='WIP'?'wip':'ns';}
+    function si(s){return s==='DONE'?'✓':s==='WIP'?'◑':'';}
+    function aStats(area){let d=0,w=0,n=0,t=0;area.kpis.forEach(k=>k.tasks.forEach(x=>{t++;if(x.status==='DONE')d++;else if(x.status==='WIP')w++;else n++;}));return{done:d,wip:w,ns:n,total:t,pct:t?Math.round(d/t*100):0};}
+    function totals(){let d=0,w=0,n=0,t=0;D.areas.forEach(a=>{const s=aStats(a);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;});return{done:d,wip:w,ns:n,total:t,pct:t?Math.round(d/t*100):0};}
+
+    function buildNav(){
+    document.getElementById('anav').innerHTML=D.areas.map(a=>{
+        const s=aStats(a);const c=COLORS[a.id]||'#52565E';
+        return `<div class="nav-item" data-view="area-${a.id}" onclick="sw('area-${a.id}',this)" style="border-left-color:transparent">
+        <div class="ndot" style="background:${c}"></div>${a.name}<span class="nb">${s.pct}%</span>
+        </div>`;
+    }).join('');
+    document.querySelectorAll('.nav-item').forEach(n=>{
+        const active=n.dataset.view===view;
+        n.classList.toggle('active',active);
+        if(active&&n.dataset.view.startsWith('area-')){
+        const id=n.dataset.view.replace('area-','');
+        n.style.borderLeftColor=COLORS[id]||'#fff';
+        } else if(!active){
+        n.style.borderLeftColor='transparent';
+        }
+    });
+    }
+
+    function sw(v,el){
+    view=v;aid=v.startsWith('area-')?v.replace('area-',''):null;
+    fil='ALL';buildNav();
+    const kpiBtn=document.getElementById('addkpibtn');
+    if(v==='dashboard'){
+        document.getElementById('ptitle').textContent='DASHBOARD';
+        document.getElementById('psub').textContent='';
+        document.getElementById('addbtn').style.display='none';
+        kpiBtn.style.display='none';
+        rDash();
+    } else if(v==='gantt'){
+        document.getElementById('ptitle').textContent='GANTT';
+        document.getElementById('psub').textContent='Feb → Sep 2026';
+        document.getElementById('addbtn').style.display='none';
+        kpiBtn.style.display='none';
+        rGantt();
+    } else {
+        const a=D.areas.find(x=>x.id===aid);
+        document.getElementById('ptitle').textContent=a.name;
+        document.getElementById('psub').textContent='AREA · '+a.kpis.length+' KPIs';
+        document.getElementById('addbtn').style.display='';
+        kpiBtn.style.display='';
+        rArea(aid);
+    }
+    }
+
+    /* ── DASHBOARD ─── */
+    function rDash(){
+    const s=totals();
+    const today=new Date(),soon=new Date();soon.setDate(today.getDate()+7);
+    let up=[];
+    D.areas.forEach(a=>a.kpis.forEach(k=>k.tasks.forEach(t=>{
+        if(t.deadline&&t.status!=='DONE'){const d=new Date(t.deadline);if(!isNaN(d)&&d<=soon)up.push({...t,_a:a.id,_d:d});}
+    })));
+    up.sort((a,b)=>a._d-b._d);
+    const arows=D.areas.map(a=>{
+        const st=aStats(a);const c=COLORS[a.id]||'#52565E';
+        return `<tr onclick="sw('area-${a.id}',null)">
+        <td><span class="an" style="color:${c}">${a.id}</span></td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--dim)">${a.kpis.length}</td>
+        <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--dim)">${st.total}</td>
+        <td>
+            <div class="prog-wrap">
+            <div class="prog-track" style="width:100px"><div class="prog-fill" style="width:${st.pct}%;background:${c}"></div></div>
+            <span class="prog-n" style="color:${c}">${st.pct}%</span>
+            </div>
+        </td>
+        <td class="bdn"><span class="gn">✓ ${st.done}</span><span style="margin-left:8px" class="an2">◑ ${st.wip}</span><span style="margin-left:8px;color:var(--faint)">${st.ns}</span></td>
+        </tr>`;
+    }).join('');
+    const dcards=up.slice(0,9).map(t=>{
+        const o=t._d<today;const c=COLORS[t._a]||'#52565E';
+        return `<div class="dl-card">
+        <div class="dl-area" style="color:${c}">${t._a}</div>
+        <div class="dl-task">${h(t.name)}</div>
+        <div class="dl-foot">
+            <span class="chip ${sc(t.status)}">${si(t.status)} ${sl(t.status)}</span>
+            <span class="dl-date ${o?'ov':''}">${fd(t.deadline)}${o?' ！':''}</span>
+        </div>
+        </div>`;
+    }).join('')||'<div style="padding:16px;font-size:11px;color:var(--faint);background:var(--white)">直近の締め切りなし ✓</div>';
+
+    document.getElementById('ct').innerHTML=`
+        <div class="dash-hero">
+        <div>
+            <div class="dh-title">MC<br>ACTION<br><span>TRACKER</span></div>
+            <div class="dh-sub">2627 · Feb→Sep · Hitotsubashi UC</div>
+        </div>
+        <div class="dh-right">
+            <div class="dh-pct-lbl">Overall Progress</div>
+            <div class="dh-pct">${s.pct}%</div>
+            <div class="dh-total">${s.done} / ${s.total} tasks · ${D.areas.length} areas · ${D.areas.reduce((a,x)=>a+x.kpis.length,0)} KPIs</div>
+        </div>
+        </div>
+        <div class="stat-row">
+        <div class="stat-card"><div class="stat-l">完了 Done</div><div class="stat-n g">${s.done}</div></div>
+        <div class="stat-card"><div class="stat-l">進行中 WIP</div><div class="stat-n a">${s.wip}</div></div>
+        <div class="stat-card"><div class="stat-l">未着手 Not Started</div><div class="stat-n d">${s.ns}</div></div>
+        </div>
+        <div class="section-label">エリア別進捗</div>
+        <table class="area-tbl">
+        <thead><tr><th>Area</th><th>KPIs</th><th>Tasks</th><th>Progress</th><th>Breakdown</th></tr></thead>
+        <tbody>${arows}</tbody>
+        </table>
+        <div class="section-label">直近7日の締め切り — ${up.length}件</div>
+        <div class="up-grid"><div class="up-head">Upcoming Deadlines</div>${dcards}</div>`;
+    }
+
+    /* ── AREA VIEW ─── */
+    function rArea(id){
+    const area=D.areas.find(a=>a.id===id);if(!area)return;
+    const s=aStats(area);const c=COLORS[id]||'#52565E';
+    const q=document.getElementById('si').value.toLowerCase();
+    const fbar=`<div class="fbar">
+        <span class="fl">Filter</span>
+        <button class="fb ${fil==='ALL'?'active':''}" onclick="setF('ALL')">All (${s.total})</button>
+        <button class="fb ${fil==='DONE'?'active':''}" onclick="setF('DONE')">Done (${s.done})</button>
+        <button class="fb ${fil==='WIP'?'active':''}" onclick="setF('WIP')">WIP (${s.wip})</button>
+        <button class="fb ${fil==='NOT_STARTED'?'active':''}" onclick="setF('NOT_STARTED')">Not Started (${s.ns})</button>
+        <div class="fr" style="color:${c}">${s.done}/${s.total}</div>
+    </div>`;
+    const kpis=area.kpis.map((k,i)=>{
+        const dn=k.tasks.filter(t=>t.status==='DONE').length,tot2=k.tasks.length;
+        const pct=tot2?Math.round(dn/tot2*100):0;
+        let ts=[...k.tasks];
+        if(fil!=='ALL')ts=ts.filter(t=>t.status===fil);
+        if(q)ts=ts.filter(t=>t.name.toLowerCase().includes(q)||(t.res||'').toLowerCase().includes(q));
+        const rows=ts.map(t=>{
+        const over=isOver(t.deadline)&&t.status!=='DONE';
+        return `<tr class="tr" id="row-${t.id}">
+            <td class="tn">${h(t.name)}</td>
+            <td class="tres">${h(t.res||'—')}</td>
+            <td class="tdt">${fd(t.start)}</td>
+            <td class="tdt${over?' ov':''}">${fd(t.deadline)}${over?' ！':''}</td>
+            <td><span class="chip ${sc(t.status)}" onclick="cyc('${area.id}','${k.id}','${t.id}')">${si(t.status)?si(t.status)+' ':''}${sl(t.status)}</span></td>
+            <td><div class="ta">
+            <button class="ib" onclick="openEdit('${area.id}','${k.id}','${t.id}')">編集</button>
+            <button class="ib del" onclick="delT('${area.id}','${k.id}','${t.id}')">削除</button>
+            </div></td>
+        </tr>`;
+        }).join('');
+        return `<div class="kpi-block">
+        <div class="kpi-head" onclick="togK('${k.id}')">
+            <div class="kpi-idx" style="color:${c}">${String(i+1).padStart(2,'0')}</div>
+            <div class="kpi-info">
+            <div class="kpi-lbl">KPI ${i+1} / ${area.kpis.length}</div>
+            <div class="kpi-ttl">${h(k.name)}</div>
+            ${k.target?`<div class="kpi-target">Target: ${k.target} · Actual: ${k.actual}</div>`:''}
+            </div>
+            <div class="kpi-r">
+            <div class="kpi-pct" style="color:${c}">${pct}%</div>
+            <div class="kpi-bar"><div class="kpi-bar-f" style="width:${pct}%;background:${c}"></div></div>
+            <div class="kpi-cnt">${dn}/${tot2} done</div>
+            </div>
+            <div style="display:flex;align-items:center;border-left:1px solid var(--border);flex-shrink:0">
+            <button class="ib" style="margin:0 6px;font-size:10px" onclick="event.stopPropagation();openEditKpi('${area.id}','${k.id}')">編集</button>
+            </div>
+            <div class="kpi-chev open" id="cv-${k.id}">›</div>
+        </div>
+        <div class="kpi-body open" id="kb-${k.id}">
+            <table class="tt">
+            <thead><tr><th>タスク名</th><th>担当者</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th></th></tr></thead>
+            <tbody id="tb-${k.id}">${rows}</tbody>
+            <tfoot><tr class="add-r"><td colspan="6"><button class="add-btn" onclick="openAdd('${area.id}','${k.id}')">+ タスクを追加...</button></td></tr></tfoot>
+            </table>
+        </div>
+        </div>`;
+    }).join('');
+    // Add KPI button at bottom
+    const addKpiRow=`<div style="margin-top:4px">
+        <button class="add-btn" style="font-size:12px;padding:10px 0" onclick="openAddKpi('${area.id}')">+ KPI を追加...</button>
+    </div>`;
+    document.getElementById('ct').innerHTML=fbar+kpis+addKpiRow;
+    }
+
+    function togK(id){document.getElementById('kb-'+id)?.classList.toggle('open');const c=document.getElementById('cv-'+id);if(c)c.classList.toggle('open');}
+
+    function cyc(aId,kId,tId){
+    const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId),t=k.tasks.find(x=>x.id===tId);
+    const ord=['NOT_STARTED','WIP','DONE'];
+    t.status=ord[(ord.indexOf(t.status)+1)%3];
+    save();buildNav();
+    const row=document.getElementById('row-'+tId);
+    if(row){const chip=row.querySelector('.chip');chip.className=`chip ${sc(t.status)}`;chip.textContent=(si(t.status)?si(t.status)+' ':'')+sl(t.status);chip.onclick=()=>cyc(aId,kId,tId);}
+    toast(sl(t.status)+'に変更');
+    }
+    function setF(s){fil=s;if(aid)rArea(aid);}
+    function applyF(){if(aid)rArea(aid);else if(view==='gantt')rGantt();else rDash();}
+
+    /* ── GANTT ─── */
+    const G_START=new Date(2026,1,1); // Feb 1
+    const G_END  =new Date(2026,8,30);// Sep 30
+    const G_MS   =G_END-G_START;
+    const MONTHS =['2月','3月','4月','5月','6月','7月','8月','9月'];
+
+    function gPct(dateStr){
+    if(!dateStr)return null;
+    const d=new Date(dateStr);
+    if(isNaN(d))return null;
+    return Math.max(0,Math.min(100,(d-G_START)/G_MS*100));
+    }
+
+    function rGantt(){
+    const todayPct=Math.max(0,Math.min(100,(new Date()-G_START)/G_MS*100));
+    const areas=gfil==='ALL'?D.areas:D.areas.filter(a=>a.id===gfil);
+
+    // Area filter buttons
+    const aFilterBtns=`<div class="gantt-filter">
+        <button class="gfb ${gfil==='ALL'?'active':''}" onclick="setGF('ALL')">全エリア</button>
+        ${D.areas.map(a=>`<button class="gfb ${gfil===a.id?'active':''}" onclick="setGF('${a.id}')" style="${gfil===a.id?'':'border-color:'+COLORS[a.id]+'22'}">${a.id}</button>`).join('')}
+    </div>`;
+
+    // Build rows HTML
+    let rowsHtml='';
+    const gridLines=MONTHS.map(()=>'<div class="g-grid-col"></div>').join('');
+
+    areas.forEach(a=>{
+        const c=COLORS[a.id]||'#52565E';
+        const st=aStats(a);
+        // Area header row
+        rowsHtml+=`
+        <div class="g-area-row" style="background:${c}12;border-left:4px solid ${c}">
+            <div class="g-area-hd">
+            <span class="g-area-label" style="color:${c}">${a.id}</span>
+            <span class="g-area-count">${st.done}/${st.total}</span>
+            </div>
+            <div class="g-area-res"></div>
+            <div class="g-area-chart"><div class="g-grid">${gridLines}</div><div class="g-today" style="left:${todayPct}%"></div></div>
+        </div>`;
+
+        // Task rows
+        a.kpis.forEach(k=>{
+        k.tasks.forEach(t=>{
+            const l=gPct(t.start||t.deadline);
+            const r=gPct(t.deadline||t.start);
+            if(l===null&&r===null)return; // skip tasks with no dates
+
+            const left=l!==null?l:r;
+            const right=r!==null?r:l;
+            const width=Math.max(0.5,right-left);
+
+            const barColor=t.status==='DONE'?'#00C16E':t.status==='WIP'?c:'#CACCD1';
+            const barOpacity=t.status==='NOT_STARTED'?'0.45':'1';
+            const textColor=t.status==='NOT_STARTED'?'var(--dim)':'#fff';
+            const over=isOver(t.deadline)&&t.status!=='DONE';
+
+            rowsHtml+=`
+            <div class="g-row">
+                <div class="g-name">
+                <span class="chip ${sc(t.status)}" style="font-size:9px;padding:2px 6px;flex-shrink:0" onclick="cyc('${a.id}','${k.id}','${t.id}')">${si(t.status)||'·'}</span>
+                <span class="g-name-txt" title="${h(t.name)}">${h(t.name)}</span>
+                ${over?'<span style="color:var(--danger);font-size:10px;flex-shrink:0">！</span>':''}
+                </div>
+                <div class="g-res" title="${h(t.res||'')}">${h(t.res||'—')}</div>
+                <div class="g-chart">
+                <div class="g-grid">${gridLines}</div>
+                <div class="g-today" style="left:${todayPct}%"></div>
+                <div class="g-bar ${sc(t.status)}"
+                    style="left:${left}%;width:${width}%;background:${barColor};opacity:${barOpacity};color:${textColor}"
+                    title="${h(t.name)} (${fd(t.start)} → ${fd(t.deadline)})">
+                    ${h(t.name.length>20?t.name.slice(0,20)+'…':t.name)}
+                </div>
+                </div>
+            </div>`;
+        });
+        });
+    });
+
+    document.getElementById('ct').innerHTML=`
+        <div class="gantt-wrap">
+        <div class="gantt-toolbar">
+            <div class="gantt-legend">
+            <div class="gl-item"><div class="gl-dot" style="background:#00C16E"></div><span style="color:var(--done)">Done</span></div>
+            <div class="gl-item"><div class="gl-dot" style="background:#F48924"></div><span style="color:var(--wip)">WIP</span></div>
+            <div class="gl-item"><div class="gl-dot" style="background:#CACCD1"></div><span style="color:var(--dim)">Not Started</span></div>
+            <div class="gl-item"><div class="gl-dot" style="background:#F85A40;width:3px;height:16px;border-radius:1px"></div><span style="color:var(--danger)">今日</span></div>
+            </div>
+            ${aFilterBtns}
+        </div>
+        <div class="gantt-scroll">
+            <div class="gantt-inner">
+            <div class="gantt-head">
+                <div class="g-name-hd">タスク名</div>
+                <div class="g-res-hd">担当者</div>
+                <div class="g-timeline-hd">${MONTHS.map(m=>`<div class="g-month-hd">${m}</div>`).join('')}<div class="g-today-label" style="left:${todayPct}%"></div></div>
+            </div>
+            ${rowsHtml}
+            </div>
+        </div>
+        </div>`;
+    }
+
+    function setGF(id){gfil=id;rGantt();}
+
+    /* ── MODAL ─── */
+    function openAdd(aId,kId){
+    editing=null;
+    document.getElementById('mttl').textContent='タスク追加';
+    document.getElementById('fn').value='';
+    document.getElementById('fr').value='';
+    document.getElementById('fs2').value='';
+    document.getElementById('fd').value='';
+    document.getElementById('fst').value='NOT_STARTED';
+    fillA(aId||aid,kId);
+    document.getElementById('ov').classList.add('open');
+    setTimeout(()=>document.getElementById('fn').focus(),80);
+    }
+    function openEdit(aId,kId,tId){
+    const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId),t=k.tasks.find(x=>x.id===tId);
+    editing={aId,kId,tId};
+    document.getElementById('mttl').textContent='タスク編集';
+    document.getElementById('fn').value=t.name;
+    document.getElementById('fr').value=t.res||'';
+    document.getElementById('fs2').value=t.start||'';
+    document.getElementById('fd').value=t.deadline||'';
+    document.getElementById('fst').value=t.status;
+    fillA(aId,kId);
+    document.getElementById('ov').classList.add('open');
+    }
+    function fillA(sa,sk){
+    const el=document.getElementById('fa');
+    el.innerHTML=D.areas.map(a=>`<option value="${a.id}"${a.id===sa?' selected':''}>${a.id}</option>`).join('');
+    updK(sa,sk);
+    }
+    function updK(fa,sk){
+    const id=fa||document.getElementById('fa').value;
+    const a=D.areas.find(x=>x.id===id);
+    document.getElementById('fk').innerHTML=(a?a.kpis:[]).map(k=>`<option value="${k.id}"${k.id===sk?' selected':''}>${k.name.slice(0,40)}</option>`).join('');
+    }
+    function closeM(){document.getElementById('ov').classList.remove('open');editing=null;}
+    function saveT(){
+    const name=document.getElementById('fn').value.trim();
+    if(!name){toast('タスク名を入力してください','err');return;}
+    const aId=document.getElementById('fa').value,kId=document.getElementById('fk').value;
+    const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
+    const obj={name,res:document.getElementById('fr').value.trim(),start:document.getElementById('fs2').value,deadline:document.getElementById('fd').value,status:document.getElementById('fst').value};
+    if(editing){
+        const sa=D.areas.find(x=>x.id===editing.aId),sk=sa.kpis.find(x=>x.id===editing.kId);
+        const idx=sk.tasks.findIndex(x=>x.id===editing.tId);
+        if(editing.aId!==aId||editing.kId!==kId){sk.tasks.splice(idx,1);k.tasks.push({id:gid(),...obj});}
+        else sk.tasks[idx]={...sk.tasks[idx],...obj};
+        toast('更新しました');
+    } else {
+        k.tasks.push({id:gid(),...obj});
+        toast('追加しました');
+    }
+    save();buildNav();closeM();
+    if(view==='dashboard')rDash();else if(view==='gantt')rGantt();else if(aid)rArea(aid);
+    }
+    function delT(aId,kId,tId){
+    if(!confirm('削除しますか？'))return;
+    const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
+    k.tasks=k.tasks.filter(x=>x.id!==tId);
+    save();buildNav();
+    if(view==='dashboard')rDash();else if(view==='gantt')rGantt();else if(aid)rArea(aid);
+    toast('削除しました');
+    }
+    function exportD(){
+    const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+    const u=URL.createObjectURL(b);const a=document.createElement('a');
+    a.href=u;a.download='action-tracker-2627.json';a.click();URL.revokeObjectURL(u);toast('エクスポートしました');
+    }
+    function importD(e){
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();
+    r.onload=ev=>{try{D=JSON.parse(ev.target.result);save();buildNav();sw('dashboard',null);toast('インポートしました');}catch(err){toast('ファイルエラー','err');}};
+    r.readAsText(f);e.target.value='';
+    }
+    /* ── KPI MODAL ─── */
+    let editingKpi=null;
+    function openAddKpi(aId){
+    editingKpi=null;
+    document.getElementById('kpi-mttl').textContent='KPI 追加';
+    document.getElementById('kn').value='';
+    document.getElementById('kt').value='';
+    document.getElementById('kac').value='0';
+    document.getElementById('kpi-del-btn').style.display='none';
+    const el=document.getElementById('ka');
+    el.innerHTML=D.areas.map(a=>`<option value="${a.id}"${a.id===(aId||aid)?'selected':''}>${a.id}</option>`).join('');
+    document.getElementById('ov-kpi').classList.add('open');
+    setTimeout(()=>document.getElementById('kn').focus(),80);
+    }
+    function openEditKpi(aId,kId){
+    const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
+    editingKpi={aId,kId};
+    document.getElementById('kpi-mttl').textContent='KPI 編集';
+    document.getElementById('kn').value=k.name;
+    document.getElementById('kt').value=k.target||'';
+    document.getElementById('kac').value=k.actual||'';
+    document.getElementById('kpi-del-btn').style.display='';
+    const el=document.getElementById('ka');
+    el.innerHTML=D.areas.map(a2=>`<option value="${a2.id}"${a2.id===aId?'selected':''}>${a2.id}</option>`).join('');
+    document.getElementById('ov-kpi').classList.add('open');
+    }
+    function closeMKpi(){document.getElementById('ov-kpi').classList.remove('open');editingKpi=null;}
+    function saveKpi(){
+    const name=document.getElementById('kn').value.trim();
+    if(!name){toast('KPI名を入力してください','err');return;}
+    const aId=document.getElementById('ka').value;
+    const a=D.areas.find(x=>x.id===aId);
+    const target=parseInt(document.getElementById('kt').value)||0;
+    const actual=parseInt(document.getElementById('kac').value)||0;
+    if(editingKpi){
+        const sa=D.areas.find(x=>x.id===editingKpi.aId);
+        const kidx=sa.kpis.findIndex(x=>x.id===editingKpi.kId);
+        const existing=sa.kpis[kidx];
+        if(editingKpi.aId!==aId){sa.kpis.splice(kidx,1);a.kpis.push({...existing,name,target,actual});}
+        else sa.kpis[kidx]={...existing,name,target,actual};
+        toast('KPIを更新しました');
+    } else {
+        a.kpis.push({id:gid(),name,target,actual,tasks:[]});
+        toast('KPIを追加しました');
+    }
+    save();buildNav();closeMKpi();
+    aid=aId;view='area-'+aId;buildNav();
+    const ar=D.areas.find(x=>x.id===aId);
+    document.getElementById('ptitle').textContent=ar.name;
+    document.getElementById('psub').textContent='AREA · '+ar.kpis.length+' KPIs';
+    document.getElementById('addbtn').style.display='';
+    document.getElementById('addkpibtn').style.display='';
+    rArea(aId);
+    }
+    function delKpi(){
+    if(!editingKpi)return;
+    const a=D.areas.find(x=>x.id===editingKpi.aId);
+    const k=a.kpis.find(x=>x.id===editingKpi.kId);
+    const msg=k.tasks.length>0?`à${k.name}à${k.tasks.length}à`:'confirm';
+    if(!confirm(k.tasks.length>0?`300c${k.name}300d3068${k.tasks.length}4ef6306e30bf30b930af3092524a96643057307e3059304bFF1f`:`300c${k.name}300d3092524a96643057307e3059304bFF1f`))return;
+    const savedAid=editingKpi.aId;
+    a.kpis=a.kpis.filter(x=>x.id!==editingKpi.kId);
+    save();buildNav();closeMKpi();
+    document.getElementById('psub').textContent='AREA · '+a.kpis.length+' KPIs';
+    rArea(savedAid);
+    toast('KPI3092524a96643057307e3057305f');
+    }
+
+    function toast(msg,t=''){
+    const el=document.createElement('div');el.className='toast'+(t?' '+t:'');el.textContent=msg;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),2600);
+    }
+
+    document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){closeM();closeMKpi();}
+    if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.getElementById('si').focus();}
+    });
+    document.getElementById('ov').addEventListener('click',function(e){if(e.target===this)closeM();});
+    document.getElementById('ov-kpi').addEventListener('click',function(e){if(e.target===this)closeMKpi();});
+
+    load();buildNav();
+    document.querySelector('.nav-item[data-view="dashboard"]')?.classList.add('active');
+    rDash();
+    </script>
+    </body>
+    </html>
