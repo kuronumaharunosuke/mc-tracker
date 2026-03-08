@@ -753,7 +753,11 @@ function migrate(){
     if(!t.group)t.group='';
     if(!t.children)t.children=[];
   })));
-  D.freeProjects.forEach(p=>{ if(!p.tasks)p.tasks=[]; p.tasks.forEach(t=>{if(!t.group)t.group='';});});
+  D.freeProjects.forEach(p=>{
+    if(!p.tasks)p.tasks=[];
+    if(!('areaId' in p)) p.areaId=null; // null = グローバル、area.id = エリアスコープ
+    p.tasks.forEach(t=>{if(!t.group)t.group='';});
+  });
 }
 function save(){try{localStorage.setItem(SK,JSON.stringify(D));}catch(e){}}
 function gid(){return 'x'+Date.now()+'_'+Math.random().toString(36).slice(2,5);}
@@ -772,6 +776,8 @@ function taskStats(t){
 function aStats(area){
   let d=0,w=0,n=0,t=0;
   area.kpis.forEach(k=>k.tasks.forEach(task=>{const s=taskStats(task);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;}));
+  // エリアスコープのプロジェクトも含める
+  D.freeProjects.filter(p=>p.areaId===area.id).forEach(p=>{const s=pStats(p);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;});
   return{done:d,wip:w,ns:n,total:t,pct:t?Math.round(d/t*100):0};
 }
 function pStats(proj){
@@ -781,8 +787,8 @@ function pStats(proj){
 }
 function totals(){
   let d=0,w=0,n=0,t=0;
-  D.areas.forEach(a=>{const s=aStats(a);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;});
-  D.freeProjects.forEach(p=>{const s=pStats(p);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;});
+  D.areas.forEach(a=>{const s=aStats(a);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;}); // area-scoped PJTs included via aStats
+  D.freeProjects.filter(p=>!p.areaId).forEach(p=>{const s=pStats(p);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;}); // グローバルのみ
   return{done:d,wip:w,ns:n,total:t,pct:t?Math.round(d/t*100):0};
 }
 
@@ -794,7 +800,7 @@ function buildNav(){
       <div class="ndot" style="background:${c}"></div>${a.name}<span class="nb">${s.pct}%</span>
     </div>`;
   }).join('');
-  document.getElementById('fpnav').innerHTML=D.freeProjects.map(p=>{
+  document.getElementById('fpnav').innerHTML=D.freeProjects.filter(p=>!p.areaId).map(p=>{
     const s=pStats(p);
     return `<div class="nav-item" data-view="fp-${p.id}" onclick="sw('fp-${p.id}',this)">
       <div class="ndot" style="background:${p.color||'#037EF3'}"></div>
@@ -871,12 +877,13 @@ async function rDash(){
     </tr>`;
   }).join('');
 
-  const fpCards = D.freeProjects.length ? `
+  const globalProjects = D.freeProjects.filter(p=>!p.areaId);
+  const fpCards = globalProjects.length ? `
     <div class="section-row">
-      <div class="section-label" style="margin-bottom:0">自由タスク・プロジェクト</div>
+      <div class="section-label" style="margin-bottom:0">自由タスク・プロジェクト（グローバル）</div>
       <button class="btn btn-sm" onclick="openAddProject()">+ プロジェクト追加</button>
     </div>
-    <div class="fp-grid" style="margin-top:10px">${D.freeProjects.map(p=>{
+    <div class="fp-grid" style="margin-top:10px">${globalProjects.map(p=>{
       const ps=pStats(p);
       return `<div class="fp-card" onclick="sw('fp-${p.id}',null)">
         <div class="fp-card-stripe" style="background:${p.color||'#037EF3'}"></div>
@@ -890,7 +897,7 @@ async function rDash(){
       </div>`;
     }).join('')}</div>` : `
     <div class="section-row">
-      <div class="section-label" style="margin-bottom:0">自由タスク・プロジェクト</div>
+      <div class="section-label" style="margin-bottom:0">自由タスク・プロジェクト（グローバル）</div>
       <button class="btn btn-sm" onclick="openAddProject()">+ プロジェクト追加</button>
     </div>
     <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:24px;text-align:center;margin-top:10px;margin-bottom:24px">
@@ -1014,10 +1021,101 @@ function rArea(id){
       </div>
     </div>`;
   }).join('');
-  document.getElementById('ct').innerHTML=fbar+kpis+`<div style="margin-top:4px"><button class="add-btn" style="font-size:12px;padding:10px 0" onclick="openAddKpi('${area.id}')">+ KPI を追加...</button></div>`;
+  document.getElementById('ct').innerHTML=fbar+kpis+`<div style="margin-top:4px"><button class="add-btn" style="font-size:12px;padding:10px 0" onclick="openAddKpi('${area.id}')">+ KPI を追加...</button></div>`+renderAreaProjects(area.id, c);
 }
 
-// ── FREE PROJECT VIEW ──
+// ── AREA-SCOPED PROJECTS ──
+function renderAreaProjects(areaId, areaColor){
+  const projs = D.freeProjects.filter(p=>p.areaId===areaId);
+  const c = areaColor || COLORS[areaId] || '#037EF3';
+  const cards = projs.map(p=>{
+    const ps=pStats(p);
+    const q=document.getElementById('si').value.toLowerCase();
+    let rows='';let i2=0;
+    const tasks=p.tasks.filter(t=>{
+      if(fil!=='ALL'&&t.status!==fil)return false;
+      if(q&&!t.name.toLowerCase().includes(q)&&!(t.res||'').toLowerCase().includes(q))return false;
+      return true;
+    });
+    while(i2<tasks.length){
+      const t=tasks[i2];const grp=t.group||'';
+      let span=1;if(grp){while(i2+span<tasks.length&&tasks[i2+span].group===grp)span++;}
+      const over=isOver(t.deadline)&&t.status!=='DONE';
+      rows+=`<tr class="tr" id="frow-${t.id}">
+        <td class="group-cell${grp?'':' empty'}" rowspan="${span}">${grp?`<span class="group-cell-label" style="border-left:3px solid ${p.color||c}">${h(grp)}</span>`:''}</td>
+        <td class="tn">${h(t.name)}</td><td class="tres">${h(t.res||'—')}</td>
+        <td class="tdt">${fd(t.start)}</td>
+        <td class="tdt${over?' ov':''}">${fd(t.deadline)}${over?' ！':''}</td>
+        <td><span class="chip ${sc(t.status)}" onclick="cycFT('${p.id}','${t.id}',event)">${si(t.status)?si(t.status)+' ':''}${sl(t.status)}</span></td>
+        <td class="tnote">${t.note?h(t.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="openEditFT('${p.id}','${t.id}')">+ メモ</span>`}</td>
+        <td class="tby">${h(t._by||'')}</td>
+        <td><div class="ta"><button class="ib" onclick="openEditFT('${p.id}','${t.id}')">編集</button><button class="ib del" onclick="delFT('${p.id}','${t.id}')">削除</button></div></td>
+      </tr>`;
+      for(let j=1;j<span;j++){
+        const tj=tasks[i2+j];const overj=isOver(tj.deadline)&&tj.status!=='DONE';
+        rows+=`<tr class="tr" id="frow-${tj.id}">
+          <td class="tn">${h(tj.name)}</td><td class="tres">${h(tj.res||'—')}</td>
+          <td class="tdt">${fd(tj.start)}</td>
+          <td class="tdt${overj?' ov':''}">${fd(tj.deadline)}${overj?' ！':''}</td>
+          <td><span class="chip ${sc(tj.status)}" onclick="cycFT('${p.id}','${tj.id}',event)">${si(tj.status)?si(tj.status)+' ':''}${sl(tj.status)}</span></td>
+          <td class="tnote">${tj.note?h(tj.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="openEditFT('${p.id}','${tj.id}')">+ メモ</span>`}</td>
+          <td class="tby">${h(tj._by||'')}</td>
+          <td><div class="ta"><button class="ib" onclick="openEditFT('${p.id}','${tj.id}')">編集</button><button class="ib del" onclick="delFT('${p.id}','${tj.id}')">削除</button></div></td>
+        </tr>`;
+      }
+      i2+=span;
+    }
+    const emptyRow=tasks.length?'':`<tr><td colspan="9" style="padding:16px;text-align:center;font-size:11px;color:var(--faint)">タスクなし。追加してください。</td></tr>`;
+    return `<div class="kpi-block" style="margin-top:12px">
+      <div class="kpi-head" onclick="togK('ap-${p.id}')">
+        <div class="kpi-idx" style="color:${p.color||c};font-size:22px;width:64px">PJT</div>
+        <div class="kpi-info">
+          <div class="kpi-lbl">エリア内プロジェクト</div>
+          <div class="kpi-ttl">${h(p.name)}</div>
+          ${p.desc?`<div class="kpi-target">${h(p.desc)}</div>`:''}
+        </div>
+        <div class="kpi-r">
+          <div class="kpi-pct" style="color:${p.color||c}">${ps.pct}%</div>
+          <div class="kpi-bar"><div class="kpi-bar-f" style="width:${ps.pct}%;background:${p.color||c}"></div></div>
+          <div class="kpi-cnt">${ps.done}/${ps.total} done</div>
+        </div>
+        <div style="display:flex;align-items:center;border-left:1px solid var(--border);flex-shrink:0">
+          <button class="ib" style="margin:0 6px;font-size:10px" onclick="event.stopPropagation();openEditProject('${p.id}')">編集</button>
+        </div>
+        <div class="kpi-chev open" id="cv-ap-${p.id}">›</div>
+      </div>
+      <div class="kpi-body open" id="kb-ap-${p.id}">
+        <table class="tt">
+          <thead><tr><th style="width:100px">グループ</th><th>タスク名</th><th>担当者</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:150px">備考</th><th>記入者</th><th></th></tr></thead>
+          <tbody>${rows}${emptyRow}</tbody>
+          <tfoot><tr class="add-r"><td colspan="9"><button class="add-btn" onclick="openAddFreeTaskInArea('${p.id}')">+ タスクを追加...</button></td></tr></tfoot>
+        </table>
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div style="margin-top:24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div class="section-label" style="margin-bottom:0">エリア内プロジェクト</div>
+      <button class="btn btn-sm" onclick="openAddProject('${areaId}')">+ プロジェクト追加</button>
+    </div>
+    ${cards || `<div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;font-size:11px;color:var(--faint)">
+      このエリアにプロジェクトはまだありません<br>
+      <button class="btn btn-fill" style="margin-top:10px;font-size:10px" onclick="openAddProject('${areaId}')">+ プロジェクトを追加</button>
+    </div>`}
+  </div>`;
+}
+
+// togKでエリアプロジェクトのkpi-bodyも対応
+const _togK = togK;
+function togK(id){
+  const kb=document.getElementById('kb-'+id)||document.getElementById('kb-ap-'+id.replace('ap-',''));
+  if(kb)kb.classList.toggle('open');
+  const cv=document.getElementById('cv-'+id)||document.getElementById('cv-ap-'+id.replace('ap-',''));
+  if(cv)cv.classList.toggle('open');
+}
+
+
 function rFreeProject(id){
   const proj=D.freeProjects.find(p=>p.id===id);if(!proj)return;
   const s=pStats(proj);const c=proj.color||'#037EF3';
@@ -1282,6 +1380,8 @@ function delKpi(){
 
 // ── PROJECT MODAL ──
 let selectedProjColor = PROJ_COLORS[1];
+let addingProjToArea = null; // エリアスコープ追加の場合はarea.id
+
 function buildColorPicker(selected){
   selectedProjColor = selected || PROJ_COLORS[1];
   document.getElementById('pj-color-picker').innerHTML=PROJ_COLORS.map(c=>
@@ -1292,26 +1392,30 @@ function selectColor(c){
   selectedProjColor=c;
   document.querySelectorAll('#pj-color-picker .color-swatch').forEach(el=>{el.classList.toggle('selected',el.style.background===c||el.style.backgroundColor===c);});
 }
-function openAddProject(){
+function openAddProject(aId){
   editingProj=null;
-  document.getElementById('proj-mttl').textContent='プロジェクト追加';
+  addingProjToArea = aId||null;
+  const title = aId ? `プロジェクト追加（${aId}エリア内）` : 'プロジェクト追加';
+  document.getElementById('proj-mttl').textContent=title;
   document.getElementById('pj-name').value='';document.getElementById('pj-desc').value='';
   document.getElementById('proj-del-btn').style.display='none';
-  buildColorPicker(PROJ_COLORS[1]);
+  buildColorPicker(aId ? (COLORS[aId]||PROJ_COLORS[1]) : PROJ_COLORS[1]);
   document.getElementById('ov-proj').classList.add('open');
   setTimeout(()=>document.getElementById('pj-name').focus(),80);
 }
 function openEditProject(pId){
   const p=D.freeProjects.find(x=>x.id===pId);if(!p)return;
   editingProj=pId;
-  document.getElementById('proj-mttl').textContent='プロジェクト編集';
+  addingProjToArea=null;
+  const title = p.areaId ? `プロジェクト編集（${p.areaId}エリア内）` : 'プロジェクト編集';
+  document.getElementById('proj-mttl').textContent=title;
   document.getElementById('pj-name').value=p.name;document.getElementById('pj-desc').value=p.desc||'';
   document.getElementById('proj-del-btn').style.display='';
   buildColorPicker(p.color);
   document.getElementById('ov-proj').classList.add('open');
   setTimeout(()=>document.getElementById('pj-name').focus(),80);
 }
-function closeMProj(){document.getElementById('ov-proj').classList.remove('open');editingProj=null;}
+function closeMProj(){document.getElementById('ov-proj').classList.remove('open');editingProj=null;addingProjToArea=null;}
 function saveProject(){
   const name=document.getElementById('pj-name').value.trim();if(!name){toast('プロジェクト名を入力してください','err');return;}
   const desc=document.getElementById('pj-desc').value.trim();
@@ -1319,31 +1423,59 @@ function saveProject(){
     const p=D.freeProjects.find(x=>x.id===editingProj);
     p.name=name;p.desc=desc;p.color=selectedProjColor;
     logAction('edit',`プロジェクト「${name}」を更新`);toast('更新しました');
+    save();buildNav();closeMProj();
+    // エリアスコープなら現在のエリアビューをリレンダー
+    if(p.areaId && aid===p.areaId) rArea(aid);
+    else if(fpid===p.id) rFreeProject(fpid);
+    else rDash();
   } else {
-    const p={id:gid(),name,desc,color:selectedProjColor,tasks:[]};
+    const scopedAid = addingProjToArea||null;
+    const p={id:gid(),name,desc,color:selectedProjColor,tasks:[],areaId:scopedAid};
     D.freeProjects.push(p);
-    logAction('add',`プロジェクト「${name}」を作成`);toast('プロジェクトを作成しました');
-    fpid=p.id;view='fp-'+p.id;
+    logAction('add',`プロジェクト「${name}」を${scopedAid?scopedAid+'内に':''}作成`);toast('プロジェクトを作成しました');
+    save();buildNav();closeMProj();
+    if(scopedAid){
+      // エリアビューに戻る
+      aid=scopedAid; view='area-'+scopedAid;
+      const ar=D.areas.find(x=>x.id===scopedAid);
+      document.getElementById('ptitle').textContent=ar.name;
+      document.getElementById('psub').textContent='AREA · '+ar.kpis.length+' KPIs';
+      document.getElementById('addbtn').style.display='';
+      document.getElementById('addkpibtn').style.display='';
+      document.getElementById('addprojtaskbtn').style.display='none';
+      buildNav();rArea(scopedAid);
+    } else {
+      fpid=p.id;view='fp-'+p.id;
+      document.getElementById('ptitle').textContent=p.name;document.getElementById('psub').textContent='PROJECT';
+      document.getElementById('addprojtaskbtn').style.display='';
+      document.getElementById('addbtn').style.display='none';document.getElementById('addkpibtn').style.display='none';
+      rFreeProject(fpid);
+    }
   }
-  save();buildNav();closeMProj();
-  if(fpid){
-    const p=D.freeProjects.find(x=>x.id===fpid);
-    document.getElementById('ptitle').textContent=p.name;document.getElementById('psub').textContent='PROJECT';
-    document.getElementById('addprojtaskbtn').style.display='';
-    document.getElementById('addbtn').style.display='none';document.getElementById('addkpibtn').style.display='none';
-    rFreeProject(fpid);
-  } else rDash();
 }
 function delProject(){
   if(!editingProj)return;
   const p=D.freeProjects.find(x=>x.id===editingProj);
   if(!confirm(`「${p.name}」を削除しますか？タスクも全て削除されます。`))return;
+  const wasAreaId=p.areaId;
   D.freeProjects=D.freeProjects.filter(x=>x.id!==editingProj);
   logAction('del',`プロジェクト「${p.name}」を削除`);
-  save();buildNav();closeMProj();fpid=null;view='dashboard';sw('dashboard',null);toast('削除しました');
+  save();buildNav();closeMProj();
+  if(wasAreaId && aid===wasAreaId){ rArea(aid); }
+  else { fpid=null;view='dashboard';sw('dashboard',null); }
+  toast('削除しました');
 }
 
 // ── FREE TASK MODAL ──
+function openAddFreeTaskInArea(pId){
+  // エリア内プロジェクトへのタスク追加（fpidを一時的にセット）
+  const _fpid = fpid;
+  fpid = pId;
+  openAddFreeTask();
+  fpid = _fpid; // 元に戻す（saveFTはeditingFTかfpidを見るので保存後に修正）
+  // saveFT内でfpidを参照するので、グローバルにセット
+  window._ftTargetProjId = pId;
+}
 function openAddFreeTask(){
   editingFT=null;
   document.getElementById('ft-mttl').textContent='タスク追加';
@@ -1382,13 +1514,21 @@ function saveFT(){
     const ti=proj.tasks.findIndex(x=>x.id===editingFT.tId);
     proj.tasks[ti]={...proj.tasks[ti],...obj};
     logAction('edit',`[${proj.name}] 「${name}」を更新`);toast('更新しました');
+    save();buildNav();closeMFT();
+    if(proj.areaId && aid===proj.areaId) rArea(aid);
+    else if(fpid) rFreeProject(fpid);
+    else rDash();
   } else {
-    const proj=D.freeProjects.find(x=>x.id===fpid);if(!proj){toast('プロジェクトを選択してください','err');return;}
+    const targetId = window._ftTargetProjId || fpid;
+    window._ftTargetProjId = null;
+    const proj=D.freeProjects.find(x=>x.id===targetId);if(!proj){toast('プロジェクトを選択してください','err');return;}
     proj.tasks.push({id:gid(),...obj});
     logAction('add',`[${proj.name}] 「${name}」を追加`);toast('追加しました');
+    save();buildNav();closeMFT();
+    if(proj.areaId && aid===proj.areaId) rArea(aid);
+    else if(fpid) rFreeProject(fpid);
+    else rDash();
   }
-  save();buildNav();closeMFT();
-  if(fpid)rFreeProject(fpid);else rDash();
 }
 function delEditingFreeTask(){
   if(!editingFT)return;if(!confirm('削除しますか？'))return;
@@ -1400,8 +1540,10 @@ function delFT(pId,tId){
   const t=proj.tasks.find(x=>x.id===tId);
   proj.tasks=proj.tasks.filter(x=>x.id!==tId);
   save();buildNav();
-  if(fpid)rFreeProject(fpid);else rDash();
   logAction('del',`[${proj.name}] 「${t?.name||tId}」を削除`);toast('削除しました');
+  if(proj.areaId && aid===proj.areaId) rArea(aid);
+  else if(fpid) rFreeProject(fpid);
+  else rDash();
 }
 
 // ── GANTT ──
