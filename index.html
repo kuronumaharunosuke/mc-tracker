@@ -50,8 +50,6 @@ body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-he
 .auth-error{margin-top:14px;background:rgba(248,90,64,.15);border:1px solid rgba(248,90,64,.3);border-radius:6px;padding:10px 14px;font-size:12px;color:#F85A40;font-weight:700;display:none;}
 .auth-error.show{display:block;}
 
-
-
 /* ── SIDEBAR ── */
 .sidebar{width:210px;min-width:210px;position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;background:var(--dark);z-index:100;overflow-y:auto;}
 .logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.08);}
@@ -67,7 +65,6 @@ body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-he
 .nb{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:rgba(255,255,255,.28);}
 .sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding:12px;display:flex;flex-direction:column;gap:6px;}
 
-/* User badge */
 .user-badge{display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,255,255,.06);border-radius:6px;}
 .user-avatar{width:26px;height:26px;border-radius:50%;background:var(--aiesec);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;overflow:hidden;}
 .user-avatar img{width:100%;height:100%;object-fit:cover;}
@@ -194,16 +191,6 @@ body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-he
 .tby{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);white-space:nowrap;}
 
 /* ── FREE PROJECTS ── */
-.proj-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
-.proj-color-dot{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
-.proj-name{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:.04em;color:var(--dark);}
-.proj-meta{font-size:10px;color:var(--dim);font-weight:700;letter-spacing:.1em;text-transform:uppercase;}
-.proj-block{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:12px;}
-.proj-block-head{display:flex;align-items:center;padding:14px 16px;border-bottom:1px solid var(--border);gap:10px;background:var(--bg);}
-.proj-block-title{font-size:13px;font-weight:900;color:var(--dark);flex:1;}
-.proj-block-stats{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);}
-
-/* Free project list (dashboard view) */
 .fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:24px;}
 .fp-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:16px;cursor:pointer;transition:box-shadow .1s,transform .1s;position:relative;overflow:hidden;}
 .fp-card:hover{box-shadow:0 4px 16px rgba(82,86,94,.1);transform:translateY(-2px);}
@@ -304,8 +291,6 @@ option{background:var(--white);}
 .sub-toggle{background:none;border:none;cursor:pointer;color:var(--faint);font-size:12px;padding:0 2px;transition:transform .12s,color .1s;line-height:1;}
 .sub-toggle:hover{color:var(--text);}
 .sub-toggle.open{transform:rotate(90deg);}
-.sub-add{font-size:10px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;cursor:pointer;background:none;border:none;padding:5px 16px 5px 48px;display:block;transition:color .08s;}
-.sub-add:hover{color:var(--text);}
 
 /* ── COMMENTS PANEL ── */
 .cp{position:fixed;top:0;right:-400px;width:380px;bottom:0;background:var(--white);border-left:1px solid var(--border);z-index:500;display:flex;flex-direction:column;transition:right .22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(46,49,56,.1);}
@@ -368,7 +353,6 @@ option{background:var(--white);}
   <div class="auth-loading-txt">読み込み中...</div>
 </div>
 
-
 <!-- ══ AUTH SCREEN ══ -->
 <div id="auth-screen" class="hidden">
   <div class="auth-card">
@@ -402,6 +386,7 @@ option{background:var(--white);}
     <button class="cp-send" onclick="postComment()">送信</button>
   </div>
 </div>
+
 <nav class="sidebar">
   <div class="logo">
     <div class="logo-eye">AIESEC Japan</div>
@@ -434,7 +419,7 @@ option{background:var(--white);}
         <div class="user-email" id="user-email">—</div>
       </div>
     </div>
-    <button class="signout-btn" onclick="signOut()">ログアウト</button>
+    <button class="signout-btn" onclick="doSignOut()">ログアウト</button>
     <button class="btn btn-fill" style="font-size:10px;padding:6px 10px" onclick="exportD()">↓ Export JSON</button>
     <label class="btn" style="font-size:10px;padding:6px 10px;cursor:pointer;text-align:center;border-color:rgba(255,255,255,.15);color:rgba(255,255,255,.45);background:transparent">↑ Import<input type="file" accept=".json" style="display:none" onchange="importD(event)"></label>
   </div>
@@ -460,7 +445,7 @@ option{background:var(--white);}
 </main>
 </div>
 
-<!-- TASK MODAL (areas) -->
+<!-- TASK MODAL -->
 <div class="overlay" id="ov">
 <div class="modal">
   <div class="mh" id="mttl">タスク追加</div>
@@ -557,7 +542,7 @@ option{background:var(--white);}
       </div>
     </div>
     <div class="mf">
-      <button class="btn" id="sub-del-btn" style="margin-right:auto;display:none;color:var(--danger);border-color:var(--danger)" onclick="delSub(_subModal?.aId,_subModal?.kId,_subModal?.tId,_subModal?.chId)">削除</button>
+      <button class="btn" id="sub-del-btn" style="margin-right:auto;display:none;color:var(--danger);border-color:var(--danger)" onclick="delSub(_subModal&&_subModal.aId,_subModal&&_subModal.kId,_subModal&&_subModal.tId,_subModal&&_subModal.chId)">削除</button>
       <button class="btn" onclick="closeMSub()">キャンセル</button>
       <button class="btn btn-fill" onclick="saveSub()">保存</button>
     </div>
@@ -618,8 +603,7 @@ option{background:var(--white);}
 
 <script>
 // ══════════════════════════════════════════════════════════════
-//  ★ FIREBASE 設定 — ここを書き換えてください ★
-//  Firebase Console → プロジェクトの設定 → マイアプリ → SDK設定
+//  FIREBASE CONFIG
 // ══════════════════════════════════════════════════════════════
 const firebaseConfig = {
   apiKey:            "AIzaSyC7atYB0W3R3hLVmYtNkzmzmDbRleALX_g",
@@ -629,91 +613,96 @@ const firebaseConfig = {
   messagingSenderId: "503780627623",
   appId:             "1:503780627623:web:95ad4fb78b9b1015573782",
 };
-// ══════════════════════════════════════════════════════════════
 
 const ALLOWED_DOMAIN = 'aiesec.jp';
 let auth, db, currentUser = null;
 
-// Firebase初期化
-firebase.initializeApp(firebaseConfig);
-auth = firebase.auth();
-db   = firebase.firestore();
-const _googleProvider = new firebase.auth.GoogleAuthProvider();
-_googleProvider.setCustomParameters({hd: ALLOWED_DOMAIN});
+// ── Firebase初期化 (エラー処理付き) ──
+let firebaseOk = false;
+try {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db   = firebase.firestore();
+  firebaseOk = true;
+} catch(e) {
+  console.error('Firebase init error:', e);
+}
+
+const _googleProvider = firebaseOk ? new firebase.auth.GoogleAuthProvider() : null;
+if (_googleProvider) _googleProvider.setCustomParameters({hd: ALLOWED_DOMAIN});
 
 // ══════════════════════════════════════════════════════════════
 //  AUTH
 // ══════════════════════════════════════════════════════════════
 function showLoading(){ document.getElementById('auth-loading').classList.remove('hidden'); }
 function hideLoading(){ document.getElementById('auth-loading').classList.add('hidden'); }
-function showScreen(id){ ['auth-screen','app-root'].forEach(s=>{
-  const el=document.getElementById(s);
-  if(s==='app-root') el.style.display= s===id?'flex':'none';
-  else el.classList.toggle('hidden', s!==id);
-}); }
-
-function setAuthError(msg){
-  const el=document.getElementById('auth-error');
-  el.textContent=msg; el.classList.toggle('show',!!msg);
+function showScreen(id){
+  ['auth-screen','app-root'].forEach(s=>{
+    const el = document.getElementById(s);
+    if (s === 'app-root') el.style.display = (s === id) ? 'flex' : 'none';
+    else el.classList.toggle('hidden', s !== id);
+  });
 }
 
+function setAuthError(msg){
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.classList.toggle('show', !!msg);
+}
+
+// ── signInWithGoogle (宣言は1回のみ) ──
 async function signInWithGoogle(){
-  const btn=document.getElementById('google-signin-btn');
-  btn.disabled=true; setAuthError('');
-  try{
+  const btn = document.getElementById('google-signin-btn');
+  btn.disabled = true;
+  setAuthError('');
+  try {
     const result = await auth.signInWithPopup(_googleProvider);
-    const email  = result.user.email||'';
-    if(!email.endsWith('@'+ALLOWED_DOMAIN)){
+    const email  = result.user.email || '';
+    if (!email.endsWith('@' + ALLOWED_DOMAIN)) {
       await auth.signOut();
       setAuthError(`@${ALLOWED_DOMAIN} のアカウントのみ許可されています（${email}）`);
     }
-  }catch(e){
-    if(e.code!=='auth/popup-closed-by-user')
-      setAuthError('ログイン失敗: '+e.message);
-  }finally{ btn.disabled=false; }
+  } catch(e) {
+    if (e.code !== 'auth/popup-closed-by-user')
+      setAuthError('ログイン失敗: ' + e.message);
+  } finally {
+    btn.disabled = false;
+  }
 }
 
-async function signOut(){
-  if(!confirm('ログアウトしますか？'))return;
+// ── signOut (宣言は1回のみ・HTMLから doSignOut() で呼ぶ) ──
+async function doSignOut(){
+  if (!confirm('ログアウトしますか？')) return;
   await auth.signOut();
   toast('ログアウトしました');
 }
 
-function updateUserBadge(user){
-  document.getElementById('user-name').textContent  = user.displayName||'—';
-  document.getElementById('user-email').textContent = user.email||'—';
-  const av = document.getElementById('user-avatar');
-  if(user.photoURL) av.innerHTML=`<img src="${user.photoURL}" alt="">`;
-  else av.textContent=(user.displayName||user.email||'?')[0].toUpperCase();
-}
-
 async function recordLogin(user){
-  if(!db)return;
-  try{
+  if (!db) return;
+  try {
     await db.collection('users').doc(user.uid).set({
       email:       user.email,
-      displayName: user.displayName||'',
-      photoURL:    user.photoURL||'',
+      displayName: user.displayName || '',
+      photoURL:    user.photoURL || '',
       lastSeen:    firebase.firestore.FieldValue.serverTimestamp(),
-    },{merge:true});
-  }catch(e){}
+    }, {merge: true});
+  } catch(e) {}
 }
 
 // ══════════════════════════════════════════════════════════════
-//  AUDIT LOG (Firebase書き込みのみ・UI表示なし)
+//  AUDIT LOG
 // ══════════════════════════════════════════════════════════════
 async function logAction(action, detail){
-  if(!db || !currentUser) return;
-  try{
+  if (!db || !currentUser) return;
+  try {
     await db.collection('audit_log').add({
       uid:         currentUser.uid,
       email:       currentUser.email,
-      displayName: currentUser.displayName||currentUser.email,
-      action,
-      detail,
+      displayName: currentUser.displayName || currentUser.email,
+      action, detail,
       ts: firebase.firestore.FieldValue.serverTimestamp(),
     });
-  }catch(e){}
+  } catch(e) {}
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -771,13 +760,11 @@ const SEED={areas:[
   {id:'i68',name:'制度・マニュアル改善',res:'ryu',start:'2026-02-22',deadline:'2026-03-31',status:'WIP',group:'',children:[]},
 ]},
 ]},
-{id:'PD',name:'PD',kpis:[
-{id:'p1',name:'KPI 1',target:5,actual:3,tasks:[
+{id:'PD',name:'PD',kpis:[{id:'p1',name:'KPI 1',target:5,actual:3,tasks:[
   {id:'p11',name:'戦術A',res:'',start:'',deadline:'',status:'DONE',group:'',children:[]},
   {id:'p12',name:'戦術B',res:'',start:'',deadline:'',status:'DONE',group:'',children:[]},
   {id:'p14',name:'戦術C',res:'',start:'',deadline:'',status:'NOT_STARTED',group:'',children:[]},
-]},
-]},
+]}]},
 {id:'TMOD',name:'TMOD',kpis:[
 {id:'tm4',name:'各LCでのOff-JT実施数の年間平均 #2',target:2,actual:4,tasks:[
   {id:'tm41',name:'EST Open前思考',res:'sohki',start:'2026-02-21',deadline:'2026-02-23',status:'WIP',group:'',children:[]},
@@ -811,8 +798,7 @@ const SEED={areas:[
   {id:'gs11',name:'戦術A',res:'',start:'2026-02-01',deadline:'2026-03-31',status:'DONE',group:'',children:[]},
   {id:'gs12',name:'戦術B',res:'',start:'2026-02-04',deadline:'2026-02-25',status:'WIP',group:'',children:[]},
 ]}]},
-],
-freeProjects:[]};
+],freeProjects:[]};
 
 let D, view='dashboard', aid=null, fpid=null, fil='ALL', gfil='ALL', editing=null, editingKpi=null, editingProj=null, editingFT=null;
 
@@ -821,7 +807,7 @@ function load(){
   D=JSON.parse(JSON.stringify(SEED));
 }
 function migrate(){
-  if(!D.freeProjects) D.freeProjects=[];
+  if(!D.freeProjects)D.freeProjects=[];
   D.areas.forEach(a=>a.kpis.forEach(k=>k.tasks.forEach(t=>{
     if(!t.group)t.group='';
     if(!t.children)t.children=[];
@@ -830,17 +816,18 @@ function migrate(){
   })));
   D.freeProjects.forEach(p=>{
     if(!p.tasks)p.tasks=[];
-    if(!('areaId' in p)) p.areaId=null;
+    if(!('areaId' in p))p.areaId=null;
     p.tasks.forEach(t=>{if(!t.group)t.group='';if(!('priority' in t))t.priority='';});
   });
 }
-// ── SYNC ──
-const DB_DOC = 'tracker/v2627';
-let _saving = false, _saveTimer = null, _syncUnsub = null;
 
-function setSyncDot(state){ // 'syncing'|'ok'|'err'|''
+// ── SYNC ──
+const DB_DOC='tracker/v2627';
+let _saving=false,_saveTimer=null,_syncUnsub=null;
+
+function setSyncDot(state){
   const d=document.getElementById('sync-dot');
-  if(d){d.className='sync-dot'+(state?' '+state:'');}
+  if(d)d.className='sync-dot'+(state?' '+state:'');
 }
 
 function save(){
@@ -858,25 +845,20 @@ function save(){
       console.error('Firestore save error',e);
       setSyncDot('err');
     }
-    setTimeout(()=>{ _saving=false; },600);
+    setTimeout(()=>{_saving=false;},600);
   },800);
 }
 
 function initSync(){
-  if(_syncUnsub) _syncUnsub();
-  _syncUnsub = db.doc(DB_DOC).onSnapshot(snap=>{
-    if(_saving) return;
-    if(!snap.exists){
-      db.doc(DB_DOC).set(D);
-      return;
-    }
+  if(_syncUnsub)_syncUnsub();
+  _syncUnsub=db.doc(DB_DOC).onSnapshot(snap=>{
+    if(_saving)return;
+    if(!snap.exists){db.doc(DB_DOC).set(D);return;}
     const remote=snap.data();
     if(JSON.stringify(remote)===JSON.stringify(D))return;
-    D=remote;
-    migrate();
+    D=remote;migrate();
     try{localStorage.setItem(SK,JSON.stringify(D));}catch(e){}
     buildNav();
-    // re-render current view
     if(view==='dashboard')rDash();
     else if(view==='gantt')rGantt();
     else if(aid)rArea(aid);
@@ -889,7 +871,6 @@ function initSync(){
   });
 }
 
-
 function gid(){return 'x'+Date.now()+'_'+Math.random().toString(36).slice(2,5);}
 function h(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fd(s){if(!s)return'—';const d=new Date(s);if(isNaN(d))return s;return(d.getMonth()+1)+'/'+(d.getDate());}
@@ -900,15 +881,12 @@ function si(s){return s==='DONE'?'✓':s==='WIP'?'◑':'';}
 function priLabel(p){return p==='high'?'高':p==='medium'?'中':p==='low'?'低':'';}
 function priHtml(p){if(!p)return'';return`<span class="pri ${p}">${priLabel(p)}</span>`;}
 
-// Comment count cache: {taskId: number}
-let _ccache = {};
+let _ccache={};
 async function loadCommentCounts(taskIds){
   if(!db||!taskIds.length)return;
   for(const tid of taskIds){
-    try{
-      const snap=await db.collection('comments').where('taskId','==',tid).get();
-      _ccache[tid]=snap.size;
-    }catch(e){ _ccache[tid]=0; }
+    try{const snap=await db.collection('comments').where('taskId','==',tid).get();_ccache[tid]=snap.size;}
+    catch(e){_ccache[tid]=0;}
   }
 }
 function ccBadge(tid){
@@ -923,7 +901,6 @@ function taskStats(t){
 function aStats(area){
   let d=0,w=0,n=0,t=0;
   area.kpis.forEach(k=>k.tasks.forEach(task=>{const s=taskStats(task);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;}));
-  // エリアスコープのプロジェクトも含める
   D.freeProjects.filter(p=>p.areaId===area.id).forEach(p=>{const s=pStats(p);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;});
   return{done:d,wip:w,ns:n,total:t,pct:t?Math.round(d/t*100):0};
 }
@@ -934,8 +911,8 @@ function pStats(proj){
 }
 function totals(){
   let d=0,w=0,n=0,t=0;
-  D.areas.forEach(a=>{const s=aStats(a);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;}); // area-scoped PJTs included via aStats
-  D.freeProjects.filter(p=>!p.areaId).forEach(p=>{const s=pStats(p);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;}); // グローバルのみ
+  D.areas.forEach(a=>{const s=aStats(a);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;});
+  D.freeProjects.filter(p=>!p.areaId).forEach(p=>{const s=pStats(p);d+=s.done;w+=s.wip;n+=s.ns;t+=s.total;});
   return{done:d,wip:w,ns:n,total:t,pct:t?Math.round(d/t*100):0};
 }
 
@@ -958,22 +935,22 @@ function buildNav(){
   document.querySelectorAll('.nav-item').forEach(n=>{
     const active=n.dataset.view===view;
     n.classList.toggle('active',active);
-    if(active && n.dataset.view.startsWith('area-'))
+    if(active&&n.dataset.view.startsWith('area-'))
       n.style.borderLeftColor=COLORS[n.dataset.view.replace('area-','')]||'#fff';
-    else if(active && n.dataset.view.startsWith('fp-')){
+    else if(active&&n.dataset.view.startsWith('fp-')){
       const p=D.freeProjects.find(x=>x.id===n.dataset.view.replace('fp-',''));
       n.style.borderLeftColor=p?.color||'#037EF3';
     } else n.style.borderLeftColor='transparent';
   });
 }
 
-function sw(v, el){
-  view=v; aid=null; fpid=null; fil='ALL';
+function sw(v,el){
+  view=v;aid=null;fpid=null;fil='ALL';
   buildNav();
   const kpiBtn=document.getElementById('addkpibtn');
   const addBtn=document.getElementById('addbtn');
   const ptBtn=document.getElementById('addprojtaskbtn');
-  kpiBtn.style.display='none'; addBtn.style.display='none'; ptBtn.style.display='none';
+  kpiBtn.style.display='none';addBtn.style.display='none';ptBtn.style.display='none';
   if(v==='dashboard'){
     document.getElementById('ptitle').textContent='DASHBOARD';
     document.getElementById('psub').textContent='';
@@ -987,7 +964,7 @@ function sw(v, el){
     const a=D.areas.find(x=>x.id===aid);
     document.getElementById('ptitle').textContent=a.name;
     document.getElementById('psub').textContent='AREA · '+a.kpis.length+' KPIs';
-    addBtn.style.display=''; kpiBtn.style.display='';
+    addBtn.style.display='';kpiBtn.style.display='';
     rArea(aid);
   } else if(v.startsWith('fp-')){
     fpid=v.replace('fp-','');
@@ -1001,12 +978,10 @@ function sw(v, el){
 }
 
 // ── DEADLINE BANNER ──
-let _bannerDismissed = false;
+let _bannerDismissed=false;
 function deadlineBanner(){
   if(_bannerDismissed)return'';
   const today=new Date(),soon=new Date();soon.setDate(today.getDate()+3);
-
-  // エリアごとにグループ化
   const byArea={};
   D.areas.forEach(a=>{
     a.kpis.forEach(k=>k.tasks.forEach(t=>{
@@ -1027,17 +1002,12 @@ function deadlineBanner(){
       byArea[key].items.push({name:t.name,deadline:t.deadline,over:d<today});
     }
   }));
-
   if(!Object.keys(byArea).length)return'';
-
   const total=Object.values(byArea).reduce((s,g)=>s+g.items.length,0);
-
-  // エリアごとに締め切り昇順 → 先頭3件 + その他
   const groups=Object.values(byArea).map(g=>{
     g.items.sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
     const nav=g.fpId?`sw('fp-${g.fpId}',null)`:g.areaId?`sw('area-${g.areaId}',null)`:'';
     const label=g.fpId?(D.freeProjects.find(p=>p.id===g.fpId)?.name||g.fpId):g.areaId;
-    // 3件をあいうえお順でソート
     const show=[...g.items].sort((a,b)=>a.name.localeCompare(b.name,'ja')).slice(0,3);
     const rest=g.items.length-3;
     const badges=show.map(it=>`<button class="dl-banner-item${it.over?' over':''}" onclick="${nav}" title="${h(it.deadline)}">${h(it.name.slice(0,18))} · ${fd(it.deadline)}</button>`).join('');
@@ -1047,7 +1017,6 @@ function deadlineBanner(){
       <div class="dl-banner-items">${badges}${more}</div>
     </div>`;
   }).join('');
-
   return `<div class="dl-banner" id="dl-banner">
     <div class="dl-banner-icon">!</div>
     <div class="dl-banner-body">
@@ -1070,7 +1039,6 @@ async function rDash(){
     if(t.deadline&&t.status!=='DONE'){const d=new Date(t.deadline);if(!isNaN(d)&&d<=soon)up.push({...t,_a:p.name,_aColor:p.color,_d:d});}
   }));
   up.sort((a,b)=>a._d-b._d);
-
   const arows=D.areas.map(a=>{
     const st=aStats(a);const c=COLORS[a.id]||'#52565E';
     return `<tr onclick="sw('area-${a.id}',null)">
@@ -1081,9 +1049,8 @@ async function rDash(){
       <td class="bdn"><span class="gn">✓ ${st.done}</span><span style="margin-left:8px" class="an2">◑ ${st.wip}</span><span style="margin-left:8px;color:var(--faint)">${st.ns}</span></td>
     </tr>`;
   }).join('');
-
-  const globalProjects = D.freeProjects.filter(p=>!p.areaId);
-  const fpCards = globalProjects.length ? `
+  const globalProjects=D.freeProjects.filter(p=>!p.areaId);
+  const fpCards=globalProjects.length?`
     <div class="section-row">
       <div class="section-label" style="margin-bottom:0">自由タスク・プロジェクト（グローバル）</div>
       <button class="btn btn-sm" onclick="openAddProject()">+ プロジェクト追加</button>
@@ -1100,7 +1067,7 @@ async function rDash(){
           <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)">${ps.done}/${ps.total}</span>
         </div>
       </div>`;
-    }).join('')}</div>` : `
+    }).join('')}</div>`:`
     <div class="section-row">
       <div class="section-label" style="margin-bottom:0">自由タスク・プロジェクト（グローバル）</div>
       <button class="btn btn-sm" onclick="openAddProject()">+ プロジェクト追加</button>
@@ -1109,7 +1076,6 @@ async function rDash(){
       <div style="font-size:12px;color:var(--faint);margin-bottom:8px">KPIに紐づかないタスクやプロジェクトをここで管理できます</div>
       <button class="btn btn-fill" onclick="openAddProject()">+ 最初のプロジェクトを作成</button>
     </div>`;
-
   const dcards=up.slice(0,9).map(t=>{
     const o=t._d<today;const c=t._aColor||COLORS[t._a]||'#52565E';
     return `<div class="dl-card">
@@ -1118,18 +1084,10 @@ async function rDash(){
       <div class="dl-foot"><span class="chip ${sc(t.status)}">${si(t.status)} ${sl(t.status)}</span><span class="dl-date ${o?'ov':''}">${fd(t.deadline)}${o?' ！':''}</span></div>
     </div>`;
   }).join('')||'<div style="padding:16px;font-size:11px;color:var(--faint);background:var(--white)">直近の締め切りなし ✓</div>';
-
   document.getElementById('ct').innerHTML=`
     <div class="dash-hero">
-      <div>
-        <div class="dh-title">MC<br>ACTION<br><span>TRACKER</span></div>
-        <div class="dh-sub">2627 · Feb → Sep</div>
-      </div>
-      <div class="dh-right">
-        <div class="dh-pct-lbl">Overall Progress</div>
-        <div class="dh-pct">${s.pct}%</div>
-        <div class="dh-total">${s.done} / ${s.total} tasks · ${D.areas.length} areas · ${D.freeProjects.length} PJTs</div>
-      </div>
+      <div><div class="dh-title">MC<br>ACTION<br><span>TRACKER</span></div><div class="dh-sub">2627 · Feb → Sep</div></div>
+      <div class="dh-right"><div class="dh-pct-lbl">Overall Progress</div><div class="dh-pct">${s.pct}%</div><div class="dh-total">${s.done} / ${s.total} tasks · ${D.areas.length} areas · ${D.freeProjects.length} PJTs</div></div>
     </div>
     <div class="stat-row">
       <div class="stat-card"><div class="stat-l">完了 Done</div><div class="stat-n g">${s.done}</div></div>
@@ -1144,9 +1102,11 @@ async function rDash(){
       <tbody>${arows}</tbody>
     </table>
     <div class="section-label">直近7日の締め切り — ${up.length}件</div>
-    <div class="up-grid"><div class="up-head">Upcoming Deadlines</div>${dcards}</div>
-    `;\n}\n\n// ── AREA VIEW ──
-function taskRow(t, aId, kId, grpHtml, rowspan, c, onCyc, onEdit, onDel){
+    <div class="up-grid"><div class="up-head">Upcoming Deadlines</div>${dcards}</div>`;
+}
+
+// ── AREA VIEW ──
+function taskRow(t,aId,kId,grpHtml,rowspan,c,onCyc,onEdit,onDel){
   const over=isOver(t.deadline)&&t.status!=='DONE';
   const hasSub=(t.children||[]).length>0;
   const subToggle=hasSub?`<button class="sub-toggle" id="stog-${t.id}" onclick="togSub('${t.id}',event)">›</button>`:'<span style="display:inline-block;width:14px"></span>';
@@ -1164,8 +1124,8 @@ function taskRow(t, aId, kId, grpHtml, rowspan, c, onCyc, onEdit, onDel){
   </tr>`;
 }
 
-function subRows(t, aId, kId, c){
-  if(!(t.children||[]).length) return '';
+function subRows(t,aId,kId,c){
+  if(!(t.children||[]).length)return'';
   let html=`<tr id="sub-container-${t.id}" style="display:none"><td colspan="9" style="padding:0">`;
   html+=`<table style="width:100%;border-collapse:collapse">`;
   t.children.forEach(ch=>{
@@ -1245,20 +1205,18 @@ function rArea(id){
       </div>
     </div>`;
   }).join('');
-  document.getElementById('ct').innerHTML=fbar+kpis+`<div style="margin-top:4px"><button class="add-btn" style="font-size:12px;padding:10px 0" onclick="openAddKpi('${area.id}')">+ KPI を追加...</button></div>`+renderAreaProjects(area.id, c);
-  // load comment counts async
+  document.getElementById('ct').innerHTML=fbar+kpis+`<div style="margin-top:4px"><button class="add-btn" style="font-size:12px;padding:10px 0" onclick="openAddKpi('${area.id}')">+ KPI を追加...</button></div>`+renderAreaProjects(area.id,c);
   const allTids=[];
   area.kpis.forEach(k=>k.tasks.forEach(t=>{allTids.push(t.id);(t.children||[]).forEach(c=>allTids.push(c.id));}));
-  if(allTids.length) loadCommentCounts(allTids).then(()=>{
-    allTids.forEach(tid=>{document.querySelectorAll(`.cp-count`).forEach(el=>{if(el.getAttribute('onclick')?.includes(tid)){const n=_ccache[tid]||0;el.textContent=n>0?n+' コメント':'コメント';}});});
+  if(allTids.length)loadCommentCounts(allTids).then(()=>{
+    allTids.forEach(tid=>{document.querySelectorAll('.cp-count').forEach(el=>{if(el.getAttribute('onclick')?.includes(tid)){const n=_ccache[tid]||0;el.textContent=n>0?n+' コメント':'コメント';}});});
   });
 }
 
-// ── AREA-SCOPED PROJECTS ──
-function renderAreaProjects(areaId, areaColor){
-  const projs = D.freeProjects.filter(p=>p.areaId===areaId);
-  const c = areaColor || COLORS[areaId] || '#037EF3';
-  const cards = projs.map(p=>{
+function renderAreaProjects(areaId,areaColor){
+  const projs=D.freeProjects.filter(p=>p.areaId===areaId);
+  const c=areaColor||COLORS[areaId]||'#037EF3';
+  const cards=projs.map(p=>{
     const ps=pStats(p);
     const q=document.getElementById('si').value.toLowerCase();
     let rows='';let i2=0;
@@ -1323,20 +1281,26 @@ function renderAreaProjects(areaId, areaColor){
       </div>
     </div>`;
   }).join('');
-
   return `<div style="margin-top:24px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div class="section-label" style="margin-bottom:0">エリア内プロジェクト</div>
       <button class="btn btn-sm" onclick="openAddProject('${areaId}')">+ プロジェクト追加</button>
     </div>
-    ${cards || `<div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;font-size:11px;color:var(--faint)">
+    ${cards||`<div style="background:var(--white);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;font-size:11px;color:var(--faint)">
       このエリアにプロジェクトはまだありません<br>
       <button class="btn btn-fill" style="margin-top:10px;font-size:10px" onclick="openAddProject('${areaId}')">+ プロジェクトを追加</button>
     </div>`}
   </div>`;
 }
 
-
+// ── togK (1回のみ定義) ──
+function togK(id){
+  const kbId=id.startsWith('ap-')?'kb-ap-'+id.replace('ap-',''):'kb-'+id;
+  const cvId=id.startsWith('ap-')?'cv-ap-'+id.replace('ap-',''):'cv-'+id;
+  document.getElementById(kbId)?.classList.toggle('open');
+  const cv=document.getElementById(cvId);
+  if(cv)cv.classList.toggle('open');
+}
 
 function rFreeProject(id){
   const proj=D.freeProjects.find(p=>p.id===id);if(!proj)return;
@@ -1356,8 +1320,6 @@ function rFreeProject(id){
     <div class="fr" style="color:${c}">${s.done}/${s.total}</div>
     <button class="btn btn-sm" style="margin-left:8px" onclick="openEditProject('${proj.id}')">⚙ 編集</button>
   </div>`;
-
-  // Group tasks
   let rows='';let i2=0;
   while(i2<tasks.length){
     const t=tasks[i2];const grp=t.group||'';
@@ -1387,9 +1349,7 @@ function rFreeProject(id){
     }
     i2+=span;
   }
-
   const emptyRow=tasks.length?'':`<tr><td colspan="9" style="padding:20px 16px;text-align:center;font-size:11px;color:var(--faint)">タスクがありません。「+ タスク追加」から追加してください。</td></tr>`;
-
   document.getElementById('ct').innerHTML=`
     ${fbar}
     <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden">
@@ -1412,13 +1372,6 @@ function rFreeProject(id){
 }
 
 // ── TASK ACTIONS ──
-function togK(id){
-  const kb=document.getElementById('kb-'+id)||document.getElementById('kb-ap-'+id.replace('ap-',''));
-  if(kb)kb.classList.toggle('open');
-  const cv=document.getElementById('cv-'+id)||document.getElementById('cv-ap-'+id.replace('ap-',''));
-  if(cv)cv.classList.toggle('open');
-}
-
 function cycTask(aId,kId,tId,e){
   if(e)e.stopPropagation();
   const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
@@ -1497,10 +1450,7 @@ function updK(fa,sk){
   const dl=document.getElementById('fg-list');
   if(dl&&k){const gs=[...new Set(k.tasks.map(t=>t.group||'').filter(Boolean))];dl.innerHTML=gs.map(g=>`<option value="${h(g)}">`).join('');}
 }
-function closeM(){
-  document.getElementById('ov').classList.remove('open');
-  editing=null;
-}
+function closeM(){document.getElementById('ov').classList.remove('open');editing=null;}
 function saveT(){
   const name=document.getElementById('fn').value.trim();
   if(!name){toast('タスク名を入力してください','err');return;}
@@ -1510,7 +1460,7 @@ function saveT(){
     start:document.getElementById('fs2').value,deadline:document.getElementById('fd').value,
     status:document.getElementById('fst').value,note:(document.getElementById('fnote')?.value||'').trim(),
     priority:document.getElementById('fpri').value||'',
-    _by: currentUser?.displayName||currentUser?.email||'',
+    _by:currentUser?.displayName||currentUser?.email||'',
   };
   if(editing){
     const{aId,kId,tId}=editing;
@@ -1525,14 +1475,12 @@ function saveT(){
       const ti=k.tasks.findIndex(x=>x.id===tId);
       k.tasks[ti]={...k.tasks[ti],...obj};
     }
-    logAction('edit',`「${name}」を更新`);
-    toast('更新しました');
+    logAction('edit',`「${name}」を更新`);toast('更新しました');
   } else {
     const aId=document.getElementById('fa').value,kId=document.getElementById('fk').value;
     const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
     k.tasks.push({id:gid(),...obj,children:[]});
-    logAction('add',`「${name}」を${aId}/${kId}に追加`);
-    toast('追加しました');
+    logAction('add',`「${name}」を${aId}/${kId}に追加`);toast('追加しました');
   }
   save();buildNav();closeM();
   if(view==='dashboard')rDash();else if(view==='gantt')rGantt();else if(aid)rArea(aid);
@@ -1541,21 +1489,20 @@ function delEditingTask(){
   if(!editing)return;
   if(!confirm('削除しますか？'))return;
   const{aId,kId,tId}=editing;
-  delT(aId,kId,tId);closeM();
+  delT(aId,kId,tId,true);closeM();
 }
-function delT(aId,kId,tId){
-  if(!editing && !confirm('削除しますか？'))return;
+function delT(aId,kId,tId,skipConfirm){
+  if(!skipConfirm&&!confirm('削除しますか？'))return;
   const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
   const t=k.tasks.find(x=>x.id===tId);
   k.tasks=k.tasks.filter(x=>x.id!==tId);
   save();buildNav();
   if(view==='dashboard')rDash();else if(view==='gantt')rGantt();else if(aid)rArea(aid);
-  logAction('del',`「${t?.name||tId}」を削除`);
-  toast('削除しました');
+  logAction('del',`「${t?.name||tId}」を削除`);toast('削除しました');
 }
 
-// ── SUBTASK FUNCTIONS ──
-function togSub(tId, e){
+// ── SUBTASK ──
+function togSub(tId,e){
   if(e)e.stopPropagation();
   const container=document.getElementById('sub-container-'+tId);
   const tog=document.getElementById('stog-'+tId);
@@ -1564,7 +1511,6 @@ function togSub(tId, e){
   container.style.display=open?'':'none';
   if(tog)tog.classList.toggle('open',open);
 }
-
 function cycSub(aId,kId,tId,chId,e){
   if(e)e.stopPropagation();
   const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
@@ -1575,11 +1521,9 @@ function cycSub(aId,kId,tId,chId,e){
   save();buildNav();
   const row=document.getElementById('row-'+chId);
   if(row){const chip=row.querySelector('.chip');chip.className=`chip ${sc(ch.status)}`;chip.textContent=(si(ch.status)?si(ch.status)+' ':'')+sl(ch.status);}
-  logAction('status',`サブ「${ch.name}」→ ${sl(ch.status)}`);
-  toast(sl(ch.status)+'に変更');
+  logAction('status',`サブ「${ch.name}」→ ${sl(ch.status)}`);toast(sl(ch.status)+'に変更');
 }
-
-let _subModal=null; // {aId,kId,tId,chId}
+let _subModal=null;
 function addSubTask(aId,kId,tId,e){
   if(e)e.stopPropagation();
   _subModal={aId,kId,tId,chId:null};
@@ -1631,13 +1575,12 @@ function delSub(aId,kId,tId,chId){
 }
 
 // ── COMMENTS ──
-let _cpTaskId=null, _cpUnsub=null;
-function openComments(tId, e){
+let _cpTaskId=null,_cpUnsub=null;
+function openComments(tId,e){
   if(e)e.stopPropagation();
   _cpTaskId=tId;
-  // Find task name
   let taskName='',taskArea='';
-  outer: for(const a of D.areas){for(const k of a.kpis){for(const t of k.tasks){if(t.id===tId){taskName=t.name;taskArea=a.id;break outer;}for(const ch of(t.children||[])){if(ch.id===tId){taskName=ch.name;taskArea=a.id+' サブ';break outer;}}}}}
+  outer:for(const a of D.areas){for(const k of a.kpis){for(const t of k.tasks){if(t.id===tId){taskName=t.name;taskArea=a.id;break outer;}for(const ch of(t.children||[])){if(ch.id===tId){taskName=ch.name;taskArea=a.id+' サブ';break outer;}}}}}
   if(!taskName){for(const p of D.freeProjects){for(const t of p.tasks){if(t.id===tId){taskName=t.name;taskArea=p.name;break;}}}}
   document.getElementById('cp-task-name').textContent=taskName||tId;
   document.getElementById('cp-task-area').textContent=taskArea;
@@ -1682,8 +1625,7 @@ async function postComment(){
   document.getElementById('cp-input').value='';
   try{
     await db.collection('comments').add({
-      taskId:_cpTaskId,
-      text,
+      taskId:_cpTaskId,text,
       who:currentUser.displayName||currentUser.email||'Unknown',
       email:currentUser.email||'',
       ts:firebase.firestore.FieldValue.serverTimestamp(),
@@ -1751,11 +1693,10 @@ function delKpi(){
 }
 
 // ── PROJECT MODAL ──
-let selectedProjColor = PROJ_COLORS[1];
-let addingProjToArea = null; // エリアスコープ追加の場合はarea.id
-
+let selectedProjColor=PROJ_COLORS[1];
+let addingProjToArea=null;
 function buildColorPicker(selected){
-  selectedProjColor = selected || PROJ_COLORS[1];
+  selectedProjColor=selected||PROJ_COLORS[1];
   document.getElementById('pj-color-picker').innerHTML=PROJ_COLORS.map(c=>
     `<div class="color-swatch${c===selectedProjColor?' selected':''}" style="background:${c}" onclick="selectColor('${c}')"></div>`
   ).join('');
@@ -1765,21 +1706,19 @@ function selectColor(c){
   document.querySelectorAll('#pj-color-picker .color-swatch').forEach(el=>{el.classList.toggle('selected',el.style.background===c||el.style.backgroundColor===c);});
 }
 function openAddProject(aId){
-  editingProj=null;
-  addingProjToArea = aId||null;
-  const title = aId ? `プロジェクト追加（${aId}エリア内）` : 'プロジェクト追加';
+  editingProj=null;addingProjToArea=aId||null;
+  const title=aId?`プロジェクト追加（${aId}エリア内）`:'プロジェクト追加';
   document.getElementById('proj-mttl').textContent=title;
   document.getElementById('pj-name').value='';document.getElementById('pj-desc').value='';
   document.getElementById('proj-del-btn').style.display='none';
-  buildColorPicker(aId ? (COLORS[aId]||PROJ_COLORS[1]) : PROJ_COLORS[1]);
+  buildColorPicker(aId?(COLORS[aId]||PROJ_COLORS[1]):PROJ_COLORS[1]);
   document.getElementById('ov-proj').classList.add('open');
   setTimeout(()=>document.getElementById('pj-name').focus(),80);
 }
 function openEditProject(pId){
   const p=D.freeProjects.find(x=>x.id===pId);if(!p)return;
-  editingProj=pId;
-  addingProjToArea=null;
-  const title = p.areaId ? `プロジェクト編集（${p.areaId}エリア内）` : 'プロジェクト編集';
+  editingProj=pId;addingProjToArea=null;
+  const title=p.areaId?`プロジェクト編集（${p.areaId}エリア内）`:'プロジェクト編集';
   document.getElementById('proj-mttl').textContent=title;
   document.getElementById('pj-name').value=p.name;document.getElementById('pj-desc').value=p.desc||'';
   document.getElementById('proj-del-btn').style.display='';
@@ -1796,19 +1735,17 @@ function saveProject(){
     p.name=name;p.desc=desc;p.color=selectedProjColor;
     logAction('edit',`プロジェクト「${name}」を更新`);toast('更新しました');
     save();buildNav();closeMProj();
-    // エリアスコープなら現在のエリアビューをリレンダー
-    if(p.areaId && aid===p.areaId) rArea(aid);
-    else if(fpid===p.id) rFreeProject(fpid);
+    if(p.areaId&&aid===p.areaId)rArea(aid);
+    else if(fpid===p.id)rFreeProject(fpid);
     else rDash();
   } else {
-    const scopedAid = addingProjToArea||null;
+    const scopedAid=addingProjToArea||null;
     const p={id:gid(),name,desc,color:selectedProjColor,tasks:[],areaId:scopedAid};
     D.freeProjects.push(p);
     logAction('add',`プロジェクト「${name}」を${scopedAid?scopedAid+'内に':''}作成`);toast('プロジェクトを作成しました');
     save();buildNav();closeMProj();
     if(scopedAid){
-      // エリアビューに戻る
-      aid=scopedAid; view='area-'+scopedAid;
+      aid=scopedAid;view='area-'+scopedAid;
       const ar=D.areas.find(x=>x.id===scopedAid);
       document.getElementById('ptitle').textContent=ar.name;
       document.getElementById('psub').textContent='AREA · '+ar.kpis.length+' KPIs';
@@ -1833,20 +1770,15 @@ function delProject(){
   D.freeProjects=D.freeProjects.filter(x=>x.id!==editingProj);
   logAction('del',`プロジェクト「${p.name}」を削除`);
   save();buildNav();closeMProj();
-  if(wasAreaId && aid===wasAreaId){ rArea(aid); }
-  else { fpid=null;view='dashboard';sw('dashboard',null); }
+  if(wasAreaId&&aid===wasAreaId){rArea(aid);}
+  else{fpid=null;view='dashboard';sw('dashboard',null);}
   toast('削除しました');
 }
 
 // ── FREE TASK MODAL ──
 function openAddFreeTaskInArea(pId){
-  // エリア内プロジェクトへのタスク追加（fpidを一時的にセット）
-  const _fpid = fpid;
-  fpid = pId;
+  window._ftTargetProjId=pId;
   openAddFreeTask();
-  fpid = _fpid; // 元に戻す（saveFTはeditingFTかfpidを見るので保存後に修正）
-  // saveFT内でfpidを参照するので、グローバルにセット
-  window._ftTargetProjId = pId;
 }
 function openAddFreeTask(){
   editingFT=null;
@@ -1854,8 +1786,8 @@ function openAddFreeTask(){
   document.getElementById('ft-del-btn').style.display='none';
   ['ft-name','ft-res','ft-start','ft-deadline','ft-note','ft-group'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('ft-status').value='NOT_STARTED';
-  // populate group datalist
-  if(fpid){const p=D.freeProjects.find(x=>x.id===fpid);const gs=[...new Set(p.tasks.map(t=>t.group||'').filter(Boolean))];document.getElementById('ft-group-list').innerHTML=gs.map(g=>`<option value="${h(g)}">`).join('');}
+  const targetId=window._ftTargetProjId||fpid;
+  if(targetId){const p=D.freeProjects.find(x=>x.id===targetId);const gs=[...new Set(p.tasks.map(t=>t.group||'').filter(Boolean))];document.getElementById('ft-group-list').innerHTML=gs.map(g=>`<option value="${h(g)}">`).join('');}
   document.getElementById('ov-ft').classList.add('open');
   setTimeout(()=>document.getElementById('ft-name').focus(),80);
 }
@@ -1887,34 +1819,34 @@ function saveFT(){
     proj.tasks[ti]={...proj.tasks[ti],...obj};
     logAction('edit',`[${proj.name}] 「${name}」を更新`);toast('更新しました');
     save();buildNav();closeMFT();
-    if(proj.areaId && aid===proj.areaId) rArea(aid);
-    else if(fpid) rFreeProject(fpid);
+    if(proj.areaId&&aid===proj.areaId)rArea(aid);
+    else if(fpid)rFreeProject(fpid);
     else rDash();
   } else {
-    const targetId = window._ftTargetProjId || fpid;
-    window._ftTargetProjId = null;
+    const targetId=window._ftTargetProjId||fpid;
+    window._ftTargetProjId=null;
     const proj=D.freeProjects.find(x=>x.id===targetId);if(!proj){toast('プロジェクトを選択してください','err');return;}
     proj.tasks.push({id:gid(),...obj});
     logAction('add',`[${proj.name}] 「${name}」を追加`);toast('追加しました');
     save();buildNav();closeMFT();
-    if(proj.areaId && aid===proj.areaId) rArea(aid);
-    else if(fpid) rFreeProject(fpid);
+    if(proj.areaId&&aid===proj.areaId)rArea(aid);
+    else if(fpid)rFreeProject(fpid);
     else rDash();
   }
 }
 function delEditingFreeTask(){
   if(!editingFT)return;if(!confirm('削除しますか？'))return;
-  const{pId,tId}=editingFT;
-  delFT(pId,tId);closeMFT();
+  const{pId,tId}=editingFT;delFT(pId,tId,true);closeMFT();
 }
-function delFT(pId,tId){
+function delFT(pId,tId,skipConfirm){
+  if(!skipConfirm&&!confirm('削除しますか？'))return;
   const proj=D.freeProjects.find(x=>x.id===pId);if(!proj)return;
   const t=proj.tasks.find(x=>x.id===tId);
   proj.tasks=proj.tasks.filter(x=>x.id!==tId);
   save();buildNav();
   logAction('del',`[${proj.name}] 「${t?.name||tId}」を削除`);toast('削除しました');
-  if(proj.areaId && aid===proj.areaId) rArea(aid);
-  else if(fpid) rFreeProject(fpid);
+  if(proj.areaId&&aid===proj.areaId)rArea(aid);
+  else if(fpid)rFreeProject(fpid);
   else rDash();
 }
 
@@ -1922,7 +1854,7 @@ function delFT(pId,tId){
 const G_START=new Date(2026,1,1),G_END=new Date(2026,8,30),G_MS=G_END-G_START;
 const MONTH_DATA=[{name:'2月',days:28,mi:1},{name:'3月',days:31,mi:2},{name:'4月',days:30,mi:3},{name:'5月',days:31,mi:4},{name:'6月',days:30,mi:5},{name:'7月',days:31,mi:6},{name:'8月',days:31,mi:7},{name:'9月',days:30,mi:8}];
 function gPct(s){if(!s)return null;const d=new Date(s);if(isNaN(d))return null;return Math.max(0,Math.min(100,(d-G_START)/G_MS*100));}
-function buildDayTicks(){let h='';const ticks=[1,5,10,15,20,25];MONTH_DATA.forEach(m=>ticks.forEach(d=>{if(d>m.days)return;const p=gPct(`2026-${String(m.mi).padStart(2,'0')}-${String(d).padStart(2,'0')}`);if(p===null)return;h+=`<div class="g-day-tick" style="left:${p}%"><div class="g-day-tick-line"></div><div class="g-day-label">${d}</div></div>`;}));return h;}
+function buildDayTicks(){let h2='';const ticks=[1,5,10,15,20,25];MONTH_DATA.forEach(m=>ticks.forEach(d=>{if(d>m.days)return;const p=gPct(`2026-${String(m.mi).padStart(2,'0')}-${String(d).padStart(2,'0')}`);if(p===null)return;h2+=`<div class="g-day-tick" style="left:${p}%"><div class="g-day-tick-line"></div><div class="g-day-label">${d}</div></div>`;}));return h2;}
 
 function rGantt(){
   const todayPct=Math.max(0,Math.min(100,(new Date()-G_START)/G_MS*100));
@@ -1933,7 +1865,6 @@ function rGantt(){
     ${D.areas.map(a=>`<button class="gfb ${gfil===a.id?'active':''}" onclick="setGF('${a.id}')">${a.id}</button>`).join('')}
     ${D.freeProjects.map(p=>`<button class="gfb ${gfil==='fp-'+p.id?'active':''}" onclick="setGF('fp-${p.id}')" style="border-color:${p.color}33">${p.name.slice(0,8)}</button>`).join('')}
   </div>`;
-
   function bar(t,c){
     const r=gPct(t.deadline);if(r===null)return null;
     const tp=Math.max(0,Math.min(100,(new Date()-G_START)/G_MS*100));
@@ -1942,7 +1873,6 @@ function rGantt(){
     if(over)return `<div class="g-bar" style="left:${r-.5}%;width:3px;background:#F85A40;opacity:.9;top:50%;transform:translateY(-50%);height:14px" title="${h(t.name)} 期限切れ"></div>`;
     return `<div class="g-bar" style="left:${tp}%;width:${Math.max(.4,r-tp)}%;background:${t.status==='WIP'?c:'#CACCD1'};opacity:${t.status==='NOT_STARTED'?.5:1};top:50%;transform:translateY(-50%);height:14px" title="${h(t.name)}"></div>`;
   }
-
   let rows='';
   aFiltered.forEach(a=>{
     const c=COLORS[a.id]||'#52565E';const st=aStats(a);
@@ -1964,9 +1894,7 @@ function rGantt(){
       </div>`;
     }));
   });
-
-  // Free projects in gantt
-  const fpFiltered = gfil==='ALL' ? D.freeProjects : (gfil.startsWith('fp-') ? D.freeProjects.filter(p=>p.id===gfil.replace('fp-','')) : []);
+  const fpFiltered=gfil==='ALL'?D.freeProjects:(gfil.startsWith('fp-')?D.freeProjects.filter(p=>p.id===gfil.replace('fp-','')):[]); 
   fpFiltered.forEach(proj=>{
     const c=proj.color||'#037EF3';const ps=pStats(proj);
     rows+=`<div class="g-area-row" style="background:${c}">
@@ -1987,7 +1915,6 @@ function rGantt(){
       </div>`;
     });
   });
-
   document.getElementById('ct').innerHTML=`
     <div class="gantt-wrap">
       <div class="gantt-toolbar">
@@ -2035,62 +1962,68 @@ document.addEventListener('keydown',e=>{
 });
 ['ov','ov-kpi','ov-proj','ov-ft','ov-sub'].forEach(id=>{
   const el=document.getElementById(id);
-  if(el) el.addEventListener('click',function(e){if(e.target===this){closeM();closeMKpi();closeMProj();closeMFT();}});
+  if(el)el.addEventListener('click',function(e){if(e.target===this){closeM();closeMKpi();closeMProj();closeMFT();}});
 });
 
 // ══════════════════════════════════════════════════════════════
-//  BOOT
+//  BOOT — タイムアウト付きで確実にローディングを解除する
 // ══════════════════════════════════════════════════════════════
-let appInitialized = false;
+let appInitialized=false;
 
 function initApp(){
   if(appInitialized)return;
   appInitialized=true;
-  load();buildNav();
-  initSync();
+  load();
+  buildNav();
+  if(db)initSync();
   document.querySelector('.nav-item[data-view="dashboard"]')?.classList.add('active');
   rDash();
 }
 
 (function boot(){
-  auth.onAuthStateChanged(user=>{
+  // Firebase初期化に失敗していた場合はすぐにログイン画面へ
+  if(!firebaseOk||!auth){
     hideLoading();
-    if(user && user.email && user.email.endsWith('@'+ALLOWED_DOMAIN)){
-      currentUser=user;
-      showScreen('app-root');
-      document.getElementById('user-name').textContent  = user.displayName||'—';
-      document.getElementById('user-email').textContent = user.email||'—';
-      const av=document.getElementById('user-avatar');
-      if(user.photoURL) av.innerHTML=`<img src="${user.photoURL}" alt="">`;
-      else av.textContent=(user.displayName||user.email||'?')[0].toUpperCase();
-      recordLogin(user);
-      initApp();
-    } else {
-      currentUser=null;
-      showScreen('auth-screen');
-      appInitialized=false;
-    }
-  });
-})();
+    showScreen('auth-screen');
+    setAuthError('Firebase の読み込みに失敗しました。ページを再読み込みしてください。');
+    return;
+  }
 
-async function signInWithGoogle(){
-  const btn=document.getElementById('google-signin-btn');
-  btn.disabled=true; setAuthError('');
-  try{
-    const result = await auth.signInWithPopup(_googleProvider);
-    const email  = result.user.email||'';
-    if(!email.endsWith('@'+ALLOWED_DOMAIN)){
-      await auth.signOut();
-      setAuthError(`@${ALLOWED_DOMAIN} のアカウントのみ許可されています（${email}）`);
-    }
-  }catch(e){
-    if(e.code!=='auth/popup-closed-by-user') setAuthError('ログイン失敗: '+e.message);
-  }finally{ btn.disabled=false; }
-}
-async function signOut(){
-  if(!confirm('ログアウトしますか？'))return;
-  await auth.signOut();toast('ログアウトしました');
-}
+  // ★ タイムアウト: 8秒以内にonAuthStateChangedが来なければログイン画面を表示
+  const bootTimeout=setTimeout(()=>{
+    console.warn('Auth timeout — showing login screen');
+    hideLoading();
+    showScreen('auth-screen');
+  }, 8000);
+
+  try {
+    auth.onAuthStateChanged(user=>{
+      clearTimeout(bootTimeout);
+      hideLoading();
+      if(user&&user.email&&user.email.endsWith('@'+ALLOWED_DOMAIN)){
+        currentUser=user;
+        showScreen('app-root');
+        document.getElementById('user-name').textContent=user.displayName||'—';
+        document.getElementById('user-email').textContent=user.email||'—';
+        const av=document.getElementById('user-avatar');
+        if(user.photoURL)av.innerHTML=`<img src="${user.photoURL}" alt="">`;
+        else av.textContent=(user.displayName||user.email||'?')[0].toUpperCase();
+        recordLogin(user);
+        initApp();
+      } else {
+        currentUser=null;
+        showScreen('auth-screen');
+        appInitialized=false;
+      }
+    });
+  } catch(e) {
+    clearTimeout(bootTimeout);
+    console.error('onAuthStateChanged error:', e);
+    hideLoading();
+    showScreen('auth-screen');
+    setAuthError('認証エラーが発生しました: '+e.message);
+  }
+})();
 </script>
 </body>
 </html>
