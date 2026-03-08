@@ -307,6 +307,68 @@ option{background:var(--white);}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ── PRIORITY ── */
+.pri{display:inline-block;font-size:9px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:3px;white-space:nowrap;}
+.pri.high{background:#FEE2E2;color:#DC2626;}
+.pri.medium{background:#FEF3E8;color:#F48924;}
+.pri.low{background:var(--bg2);color:var(--dim);}
+
+/* ── SUBTASK ── */
+.sub-row td{background:#FAFBFC;padding:7px 16px;}
+.sub-row:hover td{background:var(--bg);}
+.sub-indent{padding-left:32px !important;display:flex;align-items:center;gap:6px;}
+.sub-toggle{background:none;border:none;cursor:pointer;color:var(--faint);font-size:12px;padding:0 2px;transition:transform .12s,color .1s;line-height:1;}
+.sub-toggle:hover{color:var(--text);}
+.sub-toggle.open{transform:rotate(90deg);}
+.sub-add{font-size:10px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.08em;cursor:pointer;background:none;border:none;padding:5px 16px 5px 48px;display:block;transition:color .08s;}
+.sub-add:hover{color:var(--text);}
+
+/* ── COMMENTS PANEL ── */
+.cp{position:fixed;top:0;right:-400px;width:380px;bottom:0;background:var(--white);border-left:1px solid var(--border);z-index:500;display:flex;flex-direction:column;transition:right .22s cubic-bezier(.4,0,.2,1);box-shadow:-4px 0 24px rgba(46,49,56,.1);}
+.cp.open{right:0;}
+.cp-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--dark);}
+.cp-title{font-size:13px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:.06em;}
+.cp-close{background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;line-height:1;padding:0 2px;}
+.cp-close:hover{color:#fff;}
+.cp-task{padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg);}
+.cp-task-name{font-size:12px;font-weight:700;color:var(--dark);}
+.cp-task-area{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:2px;}
+.cp-list{flex:1;overflow-y:auto;padding:12px 0;}
+.cp-empty{padding:20px;text-align:center;font-size:11px;color:var(--faint);}
+.cp-msg{padding:10px 20px;display:flex;gap:10px;}
+.cp-avatar{width:24px;height:24px;border-radius:50%;background:var(--aiesec);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:900;color:#fff;flex-shrink:0;}
+.cp-bubble{flex:1;}
+.cp-who{font-size:11px;font-weight:700;color:var(--dark);margin-bottom:3px;}
+.cp-text{font-size:12px;color:var(--text);line-height:1.5;word-break:break-word;}
+.cp-when{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);margin-top:3px;}
+.cp-foot{border-top:1px solid var(--border);padding:12px 16px;display:flex;gap:8px;align-items:flex-end;}
+.cp-foot textarea{flex:1;background:var(--bg);border:1.5px solid var(--border);color:var(--dark);font-size:12px;font-family:'Lato',sans-serif;padding:8px 10px;outline:none;border-radius:6px;resize:none;min-height:36px;max-height:100px;line-height:1.4;transition:border-color .1s;}
+.cp-foot textarea:focus{border-color:var(--text);}
+.cp-send{background:var(--dark);color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;}
+.cp-send:hover{background:#3d4350;}
+.cp-count{font-size:10px;font-weight:700;color:var(--dim);cursor:pointer;display:inline-flex;align-items:center;gap:3px;border:none;background:none;padding:3px 6px;border-radius:3px;transition:background .08s;}
+.cp-count:hover{background:var(--bg2);}
+.cp-overlay{position:fixed;inset:0;z-index:499;display:none;}
+.cp-overlay.open{display:block;}
+
+/* ── DEADLINE BANNER ── */
+.dl-banner{background:#FFF3CD;border:1px solid #F48924;border-radius:8px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:flex-start;gap:12px;}
+.dl-banner-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.dl-banner-body{flex:1;}
+.dl-banner-title{font-size:12px;font-weight:900;color:#92400E;margin-bottom:6px;letter-spacing:.04em;text-transform:uppercase;}
+.dl-banner-items{display:flex;flex-wrap:wrap;gap:6px;}
+.dl-banner-item{font-size:11px;background:#fff;border:1px solid #F48924;border-radius:4px;padding:3px 8px;color:#92400E;font-weight:700;cursor:pointer;}
+.dl-banner-item.over{border-color:var(--danger);color:var(--danger);background:#FFF5F5;}
+.dl-banner-close{background:none;border:none;color:#92400E;cursor:pointer;font-size:16px;opacity:.5;padding:0;flex-shrink:0;}
+.dl-banner-close:hover{opacity:1;}
+
+/* ── SYNC INDICATOR ── */
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--faint);display:inline-block;margin-left:6px;transition:background .3s;}
+.sync-dot.syncing{background:#F48924;animation:pulse .8s infinite;}
+.sync-dot.ok{background:var(--done);}
+.sync-dot.err{background:var(--danger);}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 </style>
 </head>
 <body>
@@ -336,11 +398,26 @@ option{background:var(--white);}
 
 <!-- ══ APP ══ -->
 <div class="app" id="app-root" style="display:none">
+
+<!-- Comments Panel -->
+<div class="cp-overlay" id="cp-overlay" onclick="closeComments()"></div>
+<div class="cp" id="cp">
+  <div class="cp-head">
+    <div class="cp-title">コメント</div>
+    <button class="cp-close" onclick="closeComments()">×</button>
+  </div>
+  <div class="cp-task"><div class="cp-task-name" id="cp-task-name">—</div><div class="cp-task-area" id="cp-task-area"></div></div>
+  <div class="cp-list" id="cp-list"><div class="cp-empty">コメントはまだありません</div></div>
+  <div class="cp-foot">
+    <textarea id="cp-input" placeholder="コメントを入力..." rows="2" onkeydown="if((event.metaKey||event.ctrlKey)&&event.key==='Enter')postComment()"></textarea>
+    <button class="cp-send" onclick="postComment()">送信</button>
+  </div>
+</div>
 <nav class="sidebar">
   <div class="logo">
     <div class="logo-eye">AIESEC Japan</div>
     <div class="logo-title">ACTION<br>TRACKER</div>
-    <div class="logo-sub">MC 2627 · Feb→Sep</div>
+    <div class="logo-sub">MC 2627 · Feb→Sep <span class="sync-dot" id="sync-dot" title="同期状態"></span></div>
   </div>
   <div class="nav">
     <div>
@@ -415,12 +492,22 @@ option{background:var(--white);}
       <div class="fg"><label class="fl2">締め切り</label><input class="fi" type="date" id="fd"></div>
     </div>
     <div class="fg"><label class="fl2">備考</label><textarea class="fi" id="fnote" rows="3" placeholder="メモ、リンク…"></textarea></div>
-    <div class="fg"><label class="fl2">ステータス</label>
-      <select class="fs" id="fst">
-        <option value="NOT_STARTED">Not Started</option>
-        <option value="WIP">WIP</option>
-        <option value="DONE">DONE</option>
-      </select>
+    <div class="fr2">
+      <div class="fg"><label class="fl2">優先度</label>
+        <select class="fs" id="fpri">
+          <option value="">なし</option>
+          <option value="high">高</option>
+          <option value="medium">中</option>
+          <option value="low">低</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl2">ステータス</label>
+        <select class="fs" id="fst">
+          <option value="NOT_STARTED">Not Started</option>
+          <option value="WIP">WIP</option>
+          <option value="DONE">DONE</option>
+        </select>
+      </div>
     </div>
   </div>
   <div class="mf">
@@ -449,6 +536,43 @@ option{background:var(--white);}
     <button class="btn btn-fill" onclick="saveKpi()">保存</button>
   </div>
 </div>
+</div>
+
+<!-- SUBTASK MODAL -->
+<div class="overlay" id="ov-sub">
+  <div class="modal" style="width:440px">
+    <div class="mh" id="sub-mttl">サブタスク追加</div>
+    <div class="mb">
+      <div class="fg"><label class="fl2">タスク名</label><input class="fi" id="sub-fn" placeholder="サブタスク名..."></div>
+      <div class="fg"><label class="fl2">担当者</label><input class="fi" id="sub-res" placeholder="名前..."></div>
+      <div class="fr2">
+        <div class="fg"><label class="fl2">開始日</label><input class="fi" type="date" id="sub-start"></div>
+        <div class="fg"><label class="fl2">締め切り</label><input class="fi" type="date" id="sub-deadline"></div>
+      </div>
+      <div class="fr2">
+        <div class="fg"><label class="fl2">優先度</label>
+          <select class="fs" id="sub-pri">
+            <option value="">なし</option>
+            <option value="high">高</option>
+            <option value="medium">中</option>
+            <option value="low">低</option>
+          </select>
+        </div>
+        <div class="fg"><label class="fl2">ステータス</label>
+          <select class="fs" id="sub-status">
+            <option value="NOT_STARTED">Not Started</option>
+            <option value="WIP">WIP</option>
+            <option value="DONE">DONE</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="mf">
+      <button class="btn" id="sub-del-btn" style="margin-right:auto;display:none;color:var(--danger);border-color:var(--danger)" onclick="delSub(_subModal?.aId,_subModal?.kId,_subModal?.tId,_subModal?.chId)">削除</button>
+      <button class="btn" onclick="closeMSub()">キャンセル</button>
+      <button class="btn btn-fill" onclick="saveSub()">保存</button>
+    </div>
+  </div>
 </div>
 
 <!-- PROJECT MODAL -->
@@ -752,14 +876,71 @@ function migrate(){
   D.areas.forEach(a=>a.kpis.forEach(k=>k.tasks.forEach(t=>{
     if(!t.group)t.group='';
     if(!t.children)t.children=[];
+    if(!('priority' in t))t.priority='';
+    t.children.forEach(ch=>{if(!('priority' in ch))ch.priority='';});
   })));
   D.freeProjects.forEach(p=>{
     if(!p.tasks)p.tasks=[];
-    if(!('areaId' in p)) p.areaId=null; // null = グローバル、area.id = エリアスコープ
-    p.tasks.forEach(t=>{if(!t.group)t.group='';});
+    if(!('areaId' in p)) p.areaId=null;
+    p.tasks.forEach(t=>{if(!t.group)t.group='';if(!('priority' in t))t.priority='';});
   });
 }
-function save(){try{localStorage.setItem(SK,JSON.stringify(D));}catch(e){}}
+// ── SYNC ──
+const DB_DOC = 'tracker/v2627';
+let _saving = false, _saveTimer = null, _syncUnsub = null;
+
+function setSyncDot(state){ // 'syncing'|'ok'|'err'|''
+  const d=document.getElementById('sync-dot');
+  if(d){d.className='sync-dot'+(state?' '+state:'');}
+}
+
+function save(){
+  try{localStorage.setItem(SK,JSON.stringify(D));}catch(e){}
+  if(!db)return;
+  clearTimeout(_saveTimer);
+  setSyncDot('syncing');
+  _saveTimer=setTimeout(async()=>{
+    _saving=true;
+    try{
+      await db.doc(DB_DOC).set(D);
+      setSyncDot('ok');
+      setTimeout(()=>setSyncDot(''),3000);
+    }catch(e){
+      console.error('Firestore save error',e);
+      setSyncDot('err');
+    }
+    setTimeout(()=>{ _saving=false; },600);
+  },800);
+}
+
+function initSync(){
+  if(_syncUnsub) _syncUnsub();
+  _syncUnsub = db.doc(DB_DOC).onSnapshot(snap=>{
+    if(_saving) return;
+    if(!snap.exists){
+      db.doc(DB_DOC).set(D);
+      return;
+    }
+    const remote=snap.data();
+    if(JSON.stringify(remote)===JSON.stringify(D))return;
+    D=remote;
+    migrate();
+    try{localStorage.setItem(SK,JSON.stringify(D));}catch(e){}
+    buildNav();
+    // re-render current view
+    if(view==='dashboard')rDash();
+    else if(view==='gantt')rGantt();
+    else if(aid)rArea(aid);
+    else if(fpid)rFreeProject(fpid);
+    setSyncDot('ok');
+    setTimeout(()=>setSyncDot(''),2000);
+  },err=>{
+    console.error('onSnapshot error',err);
+    setSyncDot('err');
+  });
+}
+
+
 function gid(){return 'x'+Date.now()+'_'+Math.random().toString(36).slice(2,5);}
 function h(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function fd(s){if(!s)return'—';const d=new Date(s);if(isNaN(d))return s;return(d.getMonth()+1)+'/'+(d.getDate());}
@@ -767,7 +948,24 @@ function isOver(dl){if(!dl)return false;const d=new Date(dl);return !isNaN(d)&&d
 function sl(s){return s==='DONE'?'Done':s==='WIP'?'WIP':'Not Started';}
 function sc(s){return s==='DONE'?'done':s==='WIP'?'wip':'ns';}
 function si(s){return s==='DONE'?'✓':s==='WIP'?'◑':'';}
+function priLabel(p){return p==='high'?'高':p==='medium'?'中':p==='low'?'低':'';}
+function priHtml(p){if(!p)return'';return`<span class="pri ${p}">${priLabel(p)}</span>`;}
 
+// Comment count cache: {taskId: number}
+let _ccache = {};
+async function loadCommentCounts(taskIds){
+  if(!db||!taskIds.length)return;
+  for(const tid of taskIds){
+    try{
+      const snap=await db.collection('comments').where('taskId','==',tid).get();
+      _ccache[tid]=snap.size;
+    }catch(e){ _ccache[tid]=0; }
+  }
+}
+function ccBadge(tid){
+  const n=_ccache[tid]||0;
+  return `<button class="cp-count" onclick="openComments('${tid}',event)">${n>0?n+' コメント':'コメント'}</button>`;
+}
 function taskStats(t){
   let d=0,w=0,n=0,tot=0;
   function count(x){tot++;if(x.status==='DONE')d++;else if(x.status==='WIP')w++;else n++;(x.children||[]).forEach(c=>count(c));}
@@ -853,6 +1051,35 @@ function sw(v, el){
   }
 }
 
+// ── DEADLINE BANNER ──
+let _bannerDismissed = false;
+function deadlineBanner(){
+  if(_bannerDismissed)return'';
+  const today=new Date(),soon=new Date();soon.setDate(today.getDate()+3);
+  let items=[];
+  function checkTask(t,aLabel){
+    if(!t.deadline||t.status==='DONE')return;
+    const d=new Date(t.deadline);
+    if(!isNaN(d)&&d<=soon){
+      const over=d<today;
+      items.push({name:t.name,area:aLabel,deadline:t.deadline,over});
+    }
+  }
+  D.areas.forEach(a=>a.kpis.forEach(k=>k.tasks.forEach(t=>checkTask(t,a.id))));
+  D.freeProjects.forEach(p=>p.tasks.forEach(t=>checkTask(t,p.name)));
+  if(!items.length)return'';
+  items.sort((a,b)=>new Date(a.deadline)-new Date(b.deadline));
+  const badges=items.slice(0,8).map(it=>`<span class="dl-banner-item${it.over?' over':''}" title="${h(it.area)}">${h(it.name.slice(0,20))} · ${fd(it.deadline)}</span>`).join('');
+  return `<div class="dl-banner" id="dl-banner">
+    <div class="dl-banner-icon">!</div>
+    <div class="dl-banner-body">
+      <div class="dl-banner-title">直近3日以内の締め切り (${items.length}件)</div>
+      <div class="dl-banner-items">${badges}</div>
+    </div>
+    <button class="dl-banner-close" onclick="document.getElementById('dl-banner').remove();_bannerDismissed=true">×</button>
+  </div>`;
+}
+
 // ── DASHBOARD ──
 async function rDash(){
   const s=totals();
@@ -915,6 +1142,7 @@ async function rDash(){
   }).join('')||'<div style="padding:16px;font-size:11px;color:var(--faint);background:var(--white)">直近の締め切りなし ✓</div>';
 
   document.getElementById('ct').innerHTML=`
+    ${deadlineBanner()}
     <div class="dash-hero">
       <div>
         <div class="dh-title">MC<br>ACTION<br><span>TRACKER</span></div>
@@ -955,6 +1183,46 @@ async function rDash(){
 }
 
 // ── AREA VIEW ──
+function taskRow(t, aId, kId, grpHtml, rowspan, c, onCyc, onEdit, onDel){
+  const over=isOver(t.deadline)&&t.status!=='DONE';
+  const hasSub=(t.children||[]).length>0;
+  const subToggle=hasSub?`<button class="sub-toggle" id="stog-${t.id}" onclick="togSub('${t.id}',event)">›</button>`:'<span style="display:inline-block;width:14px"></span>';
+  return `<tr class="tr" id="row-${t.id}">
+    ${grpHtml}
+    <td class="tn"><div style="display:flex;align-items:center;gap:4px">${subToggle}${priHtml(t.priority)}<span>${h(t.name)}</span></div></td>
+    <td class="tres">${h(t.res||'—')}</td>
+    <td class="tdt">${fd(t.start)}</td>
+    <td class="tdt${over?' ov':''}">${fd(t.deadline)}${over?' ！':''}</td>
+    <td><span class="chip ${sc(t.status)}" onclick="${onCyc}">${si(t.status)?si(t.status)+' ':''}${sl(t.status)}</span></td>
+    <td class="tnote">${t.note?h(t.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="${onEdit}">+ メモ</span>`}</td>
+    <td>${ccBadge(t.id)}</td>
+    <td class="tby">${h(t._by||'')}</td>
+    <td><div class="ta"><button class="ib" onclick="${onEdit}">編集</button><button class="ib del" onclick="${onDel}">削除</button>${hasSub?'':`<button class="ib" onclick="addSubTask('${aId}','${kId}','${t.id}',event)">+ サブ</button>`}</div></td>
+  </tr>`;
+}
+
+function subRows(t, aId, kId, c){
+  if(!(t.children||[]).length) return '';
+  let html=`<tr id="sub-container-${t.id}" style="display:none"><td colspan="9" style="padding:0">`;
+  html+=`<table style="width:100%;border-collapse:collapse">`;
+  t.children.forEach(ch=>{
+    const over=isOver(ch.deadline)&&ch.status!=='DONE';
+    html+=`<tr class="tr sub-row" id="row-${ch.id}">
+      <td class="tn sub-indent">${priHtml(ch.priority)}<span>${h(ch.name)}</span></td>
+      <td class="tres">${h(ch.res||'—')}</td>
+      <td class="tdt">${fd(ch.start)}</td>
+      <td class="tdt${over?' ov':''}">${fd(ch.deadline)}${over?' ！':''}</td>
+      <td><span class="chip ${sc(ch.status)}" onclick="cycSub('${aId}','${kId}','${t.id}','${ch.id}',event)">${si(ch.status)?si(ch.status)+' ':''}${sl(ch.status)}</span></td>
+      <td class="tnote">${ch.note?h(ch.note).replace(/\n/g,'<br>'):''}</td>
+      <td>${ccBadge(ch.id)}</td>
+      <td class="tby">${h(ch._by||'')}</td>
+      <td><div class="ta"><button class="ib" onclick="openEditSub('${aId}','${kId}','${t.id}','${ch.id}')">編集</button><button class="ib del" onclick="delSub('${aId}','${kId}','${t.id}','${ch.id}')">削除</button></div></td>
+    </tr>`;
+  });
+  html+=`</table></td></tr>`;
+  return html;
+}
+
 function rArea(id){
   const area=D.areas.find(a=>a.id===id);if(!area)return;
   const s=aStats(area);const c=COLORS[id]||'#52565E';
@@ -979,28 +1247,21 @@ function rArea(id){
     while(i2<tasks.length){
       const t=tasks[i2];const grp=t.group||'';
       let span=1;if(grp){while(i2+span<tasks.length&&tasks[i2+span].group===grp)span++;}
-      const over=isOver(t.deadline)&&t.status!=='DONE';
-      rows+=`<tr class="tr" id="row-${t.id}">
-        <td class="group-cell${grp?'':' empty'}" rowspan="${span}">${grp?`<span class="group-cell-label" style="border-left:3px solid ${c}">${h(grp)}</span>`:''}</td>
-        <td class="tn">${h(t.name)}</td><td class="tres">${h(t.res||'—')}</td>
-        <td class="tdt">${fd(t.start)}</td>
-        <td class="tdt${over?' ov':''}">${fd(t.deadline)}${over?' ！':''}</td>
-        <td><span class="chip ${sc(t.status)}" onclick="cycTask('${area.id}','${k.id}','${t.id}',event)">${si(t.status)?si(t.status)+' ':''}${sl(t.status)}</span></td>
-        <td class="tnote">${t.note?h(t.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="openEdit('${area.id}','${k.id}','${t.id}')">+ メモ</span>`}</td>
-        <td class="tby">${h(t._by||'')}</td>
-        <td><div class="ta"><button class="ib" onclick="openEdit('${area.id}','${k.id}','${t.id}')">編集</button><button class="ib del" onclick="delT('${area.id}','${k.id}','${t.id}')">削除</button></div></td>
-      </tr>`;
+      const grpHtml=`<td class="group-cell${grp?'':' empty'}" rowspan="${span}">${grp?`<span class="group-cell-label" style="border-left:3px solid ${c}">${h(grp)}</span>`:''}</td>`;
+      rows+=taskRow(t,area.id,k.id,grpHtml,span,c,
+        `cycTask('${area.id}','${k.id}','${t.id}',event)`,
+        `openEdit('${area.id}','${k.id}','${t.id}')`,
+        `delT('${area.id}','${k.id}','${t.id}')`
+      );
+      rows+=subRows(t,area.id,k.id,c);
       for(let j=1;j<span;j++){
-        const tj=tasks[i2+j];const overj=isOver(tj.deadline)&&tj.status!=='DONE';
-        rows+=`<tr class="tr" id="row-${tj.id}">
-          <td class="tn">${h(tj.name)}</td><td class="tres">${h(tj.res||'—')}</td>
-          <td class="tdt">${fd(tj.start)}</td>
-          <td class="tdt${overj?' ov':''}">${fd(tj.deadline)}${overj?' ！':''}</td>
-          <td><span class="chip ${sc(tj.status)}" onclick="cycTask('${area.id}','${k.id}','${tj.id}',event)">${si(tj.status)?si(tj.status)+' ':''}${sl(tj.status)}</span></td>
-          <td class="tnote">${tj.note?h(tj.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="openEdit('${area.id}','${k.id}','${tj.id}')">+ メモ</span>`}</td>
-          <td class="tby">${h(tj._by||'')}</td>
-          <td><div class="ta"><button class="ib" onclick="openEdit('${area.id}','${k.id}','${tj.id}')">編集</button><button class="ib del" onclick="delT('${area.id}','${k.id}','${tj.id}')">削除</button></div></td>
-        </tr>`;
+        const tj=tasks[i2+j];
+        rows+=taskRow(tj,area.id,k.id,'',1,c,
+          `cycTask('${area.id}','${k.id}','${tj.id}',event)`,
+          `openEdit('${area.id}','${k.id}','${tj.id}')`,
+          `delT('${area.id}','${k.id}','${tj.id}')`
+        );
+        rows+=subRows(tj,area.id,k.id,c);
       }
       i2+=span;
     }
@@ -1014,14 +1275,20 @@ function rArea(id){
       </div>
       <div class="kpi-body open" id="kb-${k.id}">
         <table class="tt">
-          <thead><tr><th style="width:100px">大タスク</th><th>タスク名</th><th>担当者</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:150px">備考</th><th>記入者</th><th></th></tr></thead>
+          <thead><tr><th style="width:100px">大タスク</th><th>タスク名</th><th>担当者</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:140px">備考</th><th style="width:80px">コメント</th><th>記入者</th><th></th></tr></thead>
           <tbody id="tb-${k.id}">${rows}</tbody>
-          <tfoot><tr class="add-r"><td colspan="9"><button class="add-btn" onclick="openAdd('${area.id}','${k.id}')">+ タスクを追加...</button></td></tr></tfoot>
+          <tfoot><tr class="add-r"><td colspan="10"><button class="add-btn" onclick="openAdd('${area.id}','${k.id}')">+ タスクを追加...</button></td></tr></tfoot>
         </table>
       </div>
     </div>`;
   }).join('');
   document.getElementById('ct').innerHTML=fbar+kpis+`<div style="margin-top:4px"><button class="add-btn" style="font-size:12px;padding:10px 0" onclick="openAddKpi('${area.id}')">+ KPI を追加...</button></div>`+renderAreaProjects(area.id, c);
+  // load comment counts async
+  const allTids=[];
+  area.kpis.forEach(k=>k.tasks.forEach(t=>{allTids.push(t.id);(t.children||[]).forEach(c=>allTids.push(c.id));}));
+  if(allTids.length) loadCommentCounts(allTids).then(()=>{
+    allTids.forEach(tid=>{document.querySelectorAll(`.cp-count`).forEach(el=>{if(el.getAttribute('onclick')?.includes(tid)){const n=_ccache[tid]||0;el.textContent=n>0?n+' コメント':'コメント';}});});
+  });
 }
 
 // ── AREA-SCOPED PROJECTS ──
@@ -1231,6 +1498,7 @@ function openAdd(aId,kId){
   ['fn','fr','fs2','fd','fnote'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fg-input').value='';
   document.getElementById('fst').value='NOT_STARTED';
+  document.getElementById('fpri').value='';
   fillA(aId||aid,kId);
   document.getElementById('ov').classList.add('open');
   setTimeout(()=>document.getElementById('fn').focus(),80);
@@ -1250,6 +1518,7 @@ function openEdit(aId,kId,tId){
   document.getElementById('fs2').value=t.start||'';
   document.getElementById('fd').value=t.deadline||'';
   document.getElementById('fst').value=t.status;
+  document.getElementById('fpri').value=t.priority||'';
   fillA(aId,kId);
   document.getElementById('ov').classList.add('open');
   setTimeout(()=>document.getElementById('fn').focus(),80);
@@ -1280,6 +1549,7 @@ function saveT(){
     res:document.getElementById('fr').value.trim(),
     start:document.getElementById('fs2').value,deadline:document.getElementById('fd').value,
     status:document.getElementById('fst').value,note:(document.getElementById('fnote')?.value||'').trim(),
+    priority:document.getElementById('fpri').value||'',
     _by: currentUser?.displayName||currentUser?.email||'',
   };
   if(editing){
@@ -1322,6 +1592,148 @@ function delT(aId,kId,tId){
   if(view==='dashboard')rDash();else if(view==='gantt')rGantt();else if(aid)rArea(aid);
   logAction('del',`「${t?.name||tId}」を削除`);
   toast('削除しました');
+}
+
+// ── SUBTASK FUNCTIONS ──
+function togSub(tId, e){
+  if(e)e.stopPropagation();
+  const container=document.getElementById('sub-container-'+tId);
+  const tog=document.getElementById('stog-'+tId);
+  if(!container)return;
+  const open=container.style.display==='none'||container.style.display==='';
+  container.style.display=open?'':'none';
+  if(tog)tog.classList.toggle('open',open);
+}
+
+function cycSub(aId,kId,tId,chId,e){
+  if(e)e.stopPropagation();
+  const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
+  const t=k.tasks.find(x=>x.id===tId);if(!t)return;
+  const ch=(t.children||[]).find(x=>x.id===chId);if(!ch)return;
+  const ord=['NOT_STARTED','WIP','DONE'];
+  ch.status=ord[(ord.indexOf(ch.status)+1)%3];
+  save();buildNav();
+  const row=document.getElementById('row-'+chId);
+  if(row){const chip=row.querySelector('.chip');chip.className=`chip ${sc(ch.status)}`;chip.textContent=(si(ch.status)?si(ch.status)+' ':'')+sl(ch.status);}
+  logAction('status',`サブ「${ch.name}」→ ${sl(ch.status)}`);
+  toast(sl(ch.status)+'に変更');
+}
+
+let _subModal=null; // {aId,kId,tId,chId}
+function addSubTask(aId,kId,tId,e){
+  if(e)e.stopPropagation();
+  _subModal={aId,kId,tId,chId:null};
+  document.getElementById('sub-mttl').textContent='サブタスク追加';
+  document.getElementById('sub-del-btn').style.display='none';
+  ['sub-fn','sub-res','sub-start','sub-deadline'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sub-pri').value='';
+  document.getElementById('sub-status').value='NOT_STARTED';
+  document.getElementById('ov-sub').classList.add('open');
+  setTimeout(()=>document.getElementById('sub-fn').focus(),80);
+}
+function openEditSub(aId,kId,tId,chId){
+  const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
+  const t=k.tasks.find(x=>x.id===tId);const ch=(t.children||[]).find(x=>x.id===chId);
+  if(!ch)return;
+  _subModal={aId,kId,tId,chId};
+  document.getElementById('sub-mttl').textContent='サブタスク編集';
+  document.getElementById('sub-del-btn').style.display='';
+  document.getElementById('sub-fn').value=ch.name||'';
+  document.getElementById('sub-res').value=ch.res||'';
+  document.getElementById('sub-start').value=ch.start||'';
+  document.getElementById('sub-deadline').value=ch.deadline||'';
+  document.getElementById('sub-pri').value=ch.priority||'';
+  document.getElementById('sub-status').value=ch.status||'NOT_STARTED';
+  document.getElementById('ov-sub').classList.add('open');
+  setTimeout(()=>document.getElementById('sub-fn').focus(),80);
+}
+function closeMSub(){document.getElementById('ov-sub').classList.remove('open');_subModal=null;}
+function saveSub(){
+  if(!_subModal)return;
+  const name=document.getElementById('sub-fn').value.trim();
+  if(!name){toast('タスク名を入力してください','err');return;}
+  const obj={name,res:document.getElementById('sub-res').value.trim(),start:document.getElementById('sub-start').value,deadline:document.getElementById('sub-deadline').value,priority:document.getElementById('sub-pri').value||'',status:document.getElementById('sub-status').value,_by:currentUser?.displayName||currentUser?.email||''};
+  const{aId,kId,tId,chId}=_subModal;
+  const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId),t=k.tasks.find(x=>x.id===tId);
+  if(!t.children)t.children=[];
+  if(chId){const i=t.children.findIndex(x=>x.id===chId);t.children[i]={...t.children[i],...obj};logAction('edit',`サブ「${name}」を更新`);toast('更新しました');}
+  else{t.children.push({id:gid(),...obj});logAction('add',`サブ「${name}」を追加`);toast('追加しました');}
+  save();buildNav();closeMSub();if(aid)rArea(aid);else rDash();
+}
+function delSub(aId,kId,tId,chId){
+  if(!confirm('削除しますか？'))return;
+  const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId),t=k.tasks.find(x=>x.id===tId);
+  const ch=(t.children||[]).find(x=>x.id===chId);
+  t.children=t.children.filter(x=>x.id!==chId);
+  save();buildNav();closeMSub();
+  logAction('del',`サブ「${ch?.name||chId}」を削除`);toast('削除しました');
+  if(aid)rArea(aid);else rDash();
+}
+
+// ── COMMENTS ──
+let _cpTaskId=null, _cpUnsub=null;
+function openComments(tId, e){
+  if(e)e.stopPropagation();
+  _cpTaskId=tId;
+  // Find task name
+  let taskName='',taskArea='';
+  outer: for(const a of D.areas){for(const k of a.kpis){for(const t of k.tasks){if(t.id===tId){taskName=t.name;taskArea=a.id;break outer;}for(const ch of(t.children||[])){if(ch.id===tId){taskName=ch.name;taskArea=a.id+' サブ';break outer;}}}}}
+  if(!taskName){for(const p of D.freeProjects){for(const t of p.tasks){if(t.id===tId){taskName=t.name;taskArea=p.name;break;}}}}
+  document.getElementById('cp-task-name').textContent=taskName||tId;
+  document.getElementById('cp-task-area').textContent=taskArea;
+  document.getElementById('cp-input').value='';
+  document.getElementById('cp').classList.add('open');
+  document.getElementById('cp-overlay').classList.add('open');
+  if(_cpUnsub)_cpUnsub();
+  if(db){
+    _cpUnsub=db.collection('comments').where('taskId','==',tId).orderBy('ts','asc').onSnapshot(snap=>{
+      _ccache[tId]=snap.size;
+      const list=document.getElementById('cp-list');
+      if(!snap.size){list.innerHTML='<div class="cp-empty">コメントはまだありません</div>';return;}
+      list.innerHTML=snap.docs.map(d=>{
+        const c=d.data();
+        const initials=(c.who||'?').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();
+        return `<div class="cp-msg">
+          <div class="cp-avatar">${initials}</div>
+          <div class="cp-bubble">
+            <div class="cp-who">${h(c.who||'')}</div>
+            <div class="cp-text">${h(c.text||'').replace(/\n/g,'<br>')}</div>
+            <div class="cp-when">${c.ts?.toDate?new Date(c.ts.toDate()).toLocaleString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}):'...'}</div>
+          </div>
+        </div>`;
+      }).join('');
+      list.scrollTop=list.scrollHeight;
+    },err=>{console.error('comments listener',err);});
+  } else {
+    document.getElementById('cp-list').innerHTML='<div class="cp-empty">Firestoreに接続されていません</div>';
+  }
+}
+function closeComments(){
+  document.getElementById('cp').classList.remove('open');
+  document.getElementById('cp-overlay').classList.remove('open');
+  if(_cpUnsub){_cpUnsub();_cpUnsub=null;}
+  _cpTaskId=null;
+}
+async function postComment(){
+  const text=document.getElementById('cp-input').value.trim();
+  if(!text||!_cpTaskId)return;
+  if(!db){toast('Firestoreに接続されていません','err');return;}
+  if(!currentUser){toast('ログインが必要です','err');return;}
+  document.getElementById('cp-input').value='';
+  try{
+    await db.collection('comments').add({
+      taskId:_cpTaskId,
+      text,
+      who:currentUser.displayName||currentUser.email||'Unknown',
+      email:currentUser.email||'',
+      ts:firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    _ccache[_cpTaskId]=(_ccache[_cpTaskId]||0)+1;
+  }catch(err){
+    console.error('postComment',err);
+    toast('送信に失敗しました','err');
+    document.getElementById('cp-input').value=text;
+  }
 }
 
 // ── KPI MODAL ──
@@ -1661,7 +2073,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeM();closeMKpi();closeMProj();closeMFT();}
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.getElementById('si').focus();}
 });
-['ov','ov-kpi','ov-proj','ov-ft'].forEach(id=>{
+['ov','ov-kpi','ov-proj','ov-ft','ov-sub'].forEach(id=>{
   const el=document.getElementById(id);
   if(el) el.addEventListener('click',function(e){if(e.target===this){closeM();closeMKpi();closeMProj();closeMFT();}});
 });
@@ -1675,6 +2087,7 @@ function initApp(){
   if(appInitialized)return;
   appInitialized=true;
   load();buildNav();
+  initSync();
   document.querySelector('.nav-item[data-view="dashboard"]')?.classList.add('active');
   rDash();
 }
