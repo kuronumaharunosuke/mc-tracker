@@ -1336,14 +1336,6 @@ function renderAreaProjects(areaId, areaColor){
   </div>`;
 }
 
-// togKでエリアプロジェクトのkpi-bodyも対応
-const _togK = togK;
-function togK(id){
-  const kb=document.getElementById('kb-'+id)||document.getElementById('kb-ap-'+id.replace('ap-',''));
-  if(kb)kb.classList.toggle('open');
-  const cv=document.getElementById('cv-'+id)||document.getElementById('cv-ap-'+id.replace('ap-',''));
-  if(cv)cv.classList.toggle('open');
-}
 
 
 function rFreeProject(id){
@@ -1420,7 +1412,12 @@ function rFreeProject(id){
 }
 
 // ── TASK ACTIONS ──
-function togK(id){document.getElementById('kb-'+id)?.classList.toggle('open');const cv=document.getElementById('cv-'+id);if(cv)cv.classList.toggle('open');}
+function togK(id){
+  const kb=document.getElementById('kb-'+id)||document.getElementById('kb-ap-'+id.replace('ap-',''));
+  if(kb)kb.classList.toggle('open');
+  const cv=document.getElementById('cv-'+id)||document.getElementById('cv-ap-'+id.replace('ap-',''));
+  if(cv)cv.classList.toggle('open');
+}
 
 function cycTask(aId,kId,tId,e){
   if(e)e.stopPropagation();
