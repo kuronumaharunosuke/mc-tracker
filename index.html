@@ -7,9 +7,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
 
 <!-- Firebase v10 compat -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-app-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-auth-compat.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.0/firebase-firestore-compat.min.js"></script>
 
 <style>
 :root{
@@ -189,6 +189,15 @@ body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-he
 .group-cell-label{background:var(--bg2);border-radius:4px;padding:4px 8px;font-size:11px;font-weight:700;color:var(--text);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100px;}
 .group-cell.empty{background:transparent;}
 .tby{font-family:'DM Mono',monospace;font-size:9px;color:var(--faint);white-space:nowrap;}
+.tsup{font-size:11px;color:var(--dim);}
+
+/* ── DRAG & DROP ── */
+.tr.dragging{opacity:.35;}
+.tr.drag-over td{border-top:2px solid var(--aiesec) !important;}
+.group-cell.drag-over{background:rgba(3,126,243,.08) !important;}
+.drag-handle{display:inline-block;cursor:grab;color:var(--faint);font-size:11px;padding:0 4px 0 0;line-height:1;vertical-align:middle;opacity:0;transition:opacity .1s;}
+.tr:hover .drag-handle,.group-cell:hover .drag-handle{opacity:1;}
+.group-cell{cursor:grab;}
 
 /* ── FREE PROJECTS ── */
 .fp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:24px;}
@@ -461,6 +470,7 @@ option{background:var(--white);}
       <datalist id="fg-list"></datalist>
     </div>
     <div class="fg"><label class="fl2">担当者</label><input class="fi" id="fr" placeholder="名前..."></div>
+    <div class="fg"><label class="fl2">sup</label><input class="fi" id="fsup" placeholder="サポート担当者..."></div>
     <div class="fr2">
       <div class="fg"><label class="fl2">開始日</label><input class="fi" type="date" id="fs2"></div>
       <div class="fg"><label class="fl2">締め切り</label><input class="fi" type="date" id="fd"></div>
@@ -519,6 +529,7 @@ option{background:var(--white);}
     <div class="mb">
       <div class="fg"><label class="fl2">タスク名</label><input class="fi" id="sub-fn" placeholder="サブタスク名..."></div>
       <div class="fg"><label class="fl2">担当者</label><input class="fi" id="sub-res" placeholder="名前..."></div>
+      <div class="fg"><label class="fl2">sup</label><input class="fi" id="sub-sup" placeholder="サポート担当者..."></div>
       <div class="fr2">
         <div class="fg"><label class="fl2">開始日</label><input class="fi" type="date" id="sub-start"></div>
         <div class="fg"><label class="fl2">締め切り</label><input class="fi" type="date" id="sub-deadline"></div>
@@ -580,6 +591,7 @@ option{background:var(--white);}
       <datalist id="ft-group-list"></datalist>
     </div>
     <div class="fg"><label class="fl2">担当者</label><input class="fi" id="ft-res" placeholder="名前..."></div>
+    <div class="fg"><label class="fl2">sup</label><input class="fi" id="ft-sup" placeholder="サポート担当者..."></div>
     <div class="fr2">
       <div class="fg"><label class="fl2">開始日</label><input class="fi" type="date" id="ft-start"></div>
       <div class="fg"><label class="fl2">締め切り</label><input class="fi" type="date" id="ft-deadline"></div>
@@ -620,12 +632,22 @@ let auth, db, currentUser = null;
 // ── Firebase初期化 (エラー処理付き) ──
 let firebaseOk = false;
 try {
+  if(typeof firebase === 'undefined') throw new Error('Firebase SDKが読み込まれていません。ネットワーク接続を確認してページを再読み込みしてください。');
   firebase.initializeApp(firebaseConfig);
   auth = firebase.auth();
   db   = firebase.firestore();
   firebaseOk = true;
 } catch(e) {
   console.error('Firebase init error:', e);
+  // auth-loadingが表示されている状態でもエラーを即表示
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const loadEl = document.getElementById('auth-loading');
+    if(loadEl) loadEl.classList.add('hidden');
+    const authEl = document.getElementById('auth-screen');
+    if(authEl) authEl.classList.remove('hidden');
+    const errEl = document.getElementById('auth-error');
+    if(errEl){ errEl.textContent = e.message || 'Firebase の読み込みに失敗しました。ページを再読み込みしてください。'; errEl.classList.add('show'); }
+  });
 }
 
 const _googleProvider = firebaseOk ? new firebase.auth.GoogleAuthProvider() : null;
@@ -812,12 +834,13 @@ function migrate(){
     if(!t.group)t.group='';
     if(!t.children)t.children=[];
     if(!('priority' in t))t.priority='';
-    t.children.forEach(ch=>{if(!('priority' in ch))ch.priority='';});
+    if(!('sup' in t))t.sup='';
+    t.children.forEach(ch=>{if(!('priority' in ch))ch.priority='';if(!('sup' in ch))ch.sup='';});;
   })));
   D.freeProjects.forEach(p=>{
     if(!p.tasks)p.tasks=[];
     if(!('areaId' in p))p.areaId=null;
-    p.tasks.forEach(t=>{if(!t.group)t.group='';if(!('priority' in t))t.priority='';});
+    p.tasks.forEach(t=>{if(!t.group)t.group='';if(!('priority' in t))t.priority='';if(!('sup' in t))t.sup='';});
   });
 }
 
@@ -1110,29 +1133,34 @@ function taskRow(t,aId,kId,grpHtml,rowspan,c,onCyc,onEdit,onDel){
   const over=isOver(t.deadline)&&t.status!=='DONE';
   const hasSub=(t.children||[]).length>0;
   const subToggle=hasSub?`<button class="sub-toggle" id="stog-${t.id}" onclick="togSub('${t.id}',event)">›</button>`:'<span style="display:inline-block;width:14px"></span>';
-  return `<tr class="tr" id="row-${t.id}">
+  return `<tr class="tr" id="row-${t.id}" draggable="true"
+    data-dtype="kpi" data-scope="${aId}" data-kid="${kId}" data-tid="${t.id}"
+    ondragstart="dgRowStart(event)" ondragover="dgOver(event)" ondragleave="dgLeave(event)"
+    ondrop="dgRowDrop(event)" ondragend="dgEnd(event)">
     ${grpHtml}
-    <td class="tn"><div style="display:flex;align-items:center;gap:4px">${subToggle}${priHtml(t.priority)}<span>${h(t.name)}</span></div></td>
+    <td class="tn"><div style="display:flex;align-items:center;gap:4px"><span class="drag-handle">⠿</span>${subToggle}${priHtml(t.priority)}<span>${h(t.name)}</span></div></td>
     <td class="tres">${h(t.res||'—')}</td>
+    <td class="tsup">${h(t.sup||'')}</td>
     <td class="tdt">${fd(t.start)}</td>
     <td class="tdt${over?' ov':''}">${fd(t.deadline)}${over?' ！':''}</td>
     <td><span class="chip ${sc(t.status)}" onclick="${onCyc}">${si(t.status)?si(t.status)+' ':''}${sl(t.status)}</span></td>
     <td class="tnote">${t.note?h(t.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="${onEdit}">+ メモ</span>`}</td>
     <td>${ccBadge(t.id)}</td>
     <td class="tby">${h(t._by||'')}</td>
-    <td><div class="ta"><button class="ib" onclick="${onEdit}">編集</button><button class="ib del" onclick="${onDel}">削除</button>${hasSub?'':`<button class="ib" onclick="addSubTask('${aId}','${kId}','${t.id}',event)">+ サブ</button>`}</div></td>
+    <td><div class="ta"><button class="ib" onclick="${onEdit}">編集</button><button class="ib" onclick="dupTask('${aId}','${kId}','${t.id}',event)">複製</button><button class="ib del" onclick="${onDel}">削除</button>${hasSub?'':`<button class="ib" onclick="addSubTask('${aId}','${kId}','${t.id}',event)">+ サブ</button>`}</div></td>
   </tr>`;
 }
 
 function subRows(t,aId,kId,c){
   if(!(t.children||[]).length)return'';
-  let html=`<tr id="sub-container-${t.id}" style="display:none"><td colspan="9" style="padding:0">`;
+  let html=`<tr id="sub-container-${t.id}" style="display:none"><td colspan="10" style="padding:0">`;
   html+=`<table style="width:100%;border-collapse:collapse">`;
   t.children.forEach(ch=>{
     const over=isOver(ch.deadline)&&ch.status!=='DONE';
     html+=`<tr class="tr sub-row" id="row-${ch.id}">
       <td class="tn sub-indent">${priHtml(ch.priority)}<span>${h(ch.name)}</span></td>
       <td class="tres">${h(ch.res||'—')}</td>
+      <td class="tsup">${h(ch.sup||'')}</td>
       <td class="tdt">${fd(ch.start)}</td>
       <td class="tdt${over?' ov':''}">${fd(ch.deadline)}${over?' ！':''}</td>
       <td><span class="chip ${sc(ch.status)}" onclick="cycSub('${aId}','${kId}','${t.id}','${ch.id}',event)">${si(ch.status)?si(ch.status)+' ':''}${sl(ch.status)}</span></td>
@@ -1170,7 +1198,7 @@ function rArea(id){
     while(i2<tasks.length){
       const t=tasks[i2];const grp=t.group||'';
       let span=1;if(grp){while(i2+span<tasks.length&&tasks[i2+span].group===grp)span++;}
-      const grpHtml=`<td class="group-cell${grp?'':' empty'}" rowspan="${span}">${grp?`<span class="group-cell-label" style="border-left:3px solid ${c}">${h(grp)}</span>`:''}</td>`;
+      const grpHtml=`<td class="group-cell${grp?'':' empty'}" rowspan="${span}"${grp?` draggable="true" data-dtype="kpi" data-scope="${area.id}" data-kid="${k.id}" data-grp="${h(grp)}" ondragstart="dgGrpStart(event)" ondragover="dgOver(event)" ondragleave="dgLeave(event)" ondrop="dgGrpDrop(event)" ondragend="dgEnd(event)"`:''}>${grp?`<span class="group-cell-label" style="border-left:3px solid ${c}"><span class="drag-handle">⠿</span>${h(grp)}</span><div style="margin-top:4px;display:flex;gap:3px"><button class="ib" style="font-size:9px;padding:2px 6px" onclick="dupGroup('${area.id}','${k.id}','${h(grp)}',event)">大タスク複製</button></div>`:''}</td>`;
       rows+=taskRow(t,area.id,k.id,grpHtml,span,c,
         `cycTask('${area.id}','${k.id}','${t.id}',event)`,
         `openEdit('${area.id}','${k.id}','${t.id}')`,
@@ -1198,9 +1226,9 @@ function rArea(id){
       </div>
       <div class="kpi-body open" id="kb-${k.id}">
         <table class="tt">
-          <thead><tr><th style="width:100px">大タスク</th><th>タスク名</th><th>担当者</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:140px">備考</th><th style="width:80px">コメント</th><th>記入者</th><th></th></tr></thead>
+          <thead><tr><th style="width:100px">大タスク</th><th>タスク名</th><th>担当者</th><th>sup</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:140px">備考</th><th style="width:80px">コメント</th><th>記入者</th><th></th></tr></thead>
           <tbody id="tb-${k.id}">${rows}</tbody>
-          <tfoot><tr class="add-r"><td colspan="10"><button class="add-btn" onclick="openAdd('${area.id}','${k.id}')">+ タスクを追加...</button></td></tr></tfoot>
+          <tfoot><tr class="add-r"><td colspan="11"><button class="add-btn" onclick="openAdd('${area.id}','${k.id}')">+ タスクを追加...</button></td></tr></tfoot>
         </table>
       </div>
     </div>`;
@@ -1229,31 +1257,34 @@ function renderAreaProjects(areaId,areaColor){
       const t=tasks[i2];const grp=t.group||'';
       let span=1;if(grp){while(i2+span<tasks.length&&tasks[i2+span].group===grp)span++;}
       const over=isOver(t.deadline)&&t.status!=='DONE';
-      rows+=`<tr class="tr" id="frow-${t.id}">
-        <td class="group-cell${grp?'':' empty'}" rowspan="${span}">${grp?`<span class="group-cell-label" style="border-left:3px solid ${p.color||c}">${h(grp)}</span>`:''}</td>
-        <td class="tn">${h(t.name)}</td><td class="tres">${h(t.res||'—')}</td>
+      const apGrpCell=grp
+        ?`<td class="group-cell" rowspan="${span}" draggable="true" data-dtype="ft" data-scope="${p.id}" data-grp="${h(grp)}" ondragstart="dgGrpStart(event)" ondragover="dgOver(event)" ondragleave="dgLeave(event)" ondrop="dgGrpDrop(event)" ondragend="dgEnd(event)"><span class="group-cell-label" style="border-left:3px solid ${p.color||c}"><span class="drag-handle">⠿</span>${h(grp)}</span><div style="margin-top:4px;display:flex;gap:3px"><button class="ib" style="font-size:9px;padding:2px 6px" onclick="dupFTGroup('${p.id}','${h(grp)}',event)">大タスク複製</button></div></td>`
+        :`<td class="group-cell empty" rowspan="${span}"></td>`;
+      rows+=`<tr class="tr" id="frow-${t.id}" draggable="true" data-dtype="ft" data-scope="${p.id}" data-tid="${t.id}" ondragstart="dgRowStart(event)" ondragover="dgOver(event)" ondragleave="dgLeave(event)" ondrop="dgRowDrop(event)" ondragend="dgEnd(event)">
+        ${apGrpCell}
+        <td class="tn"><div style="display:flex;align-items:center;gap:4px"><span class="drag-handle">⠿</span>${h(t.name)}</div></td><td class="tres">${h(t.res||'—')}</td><td class="tsup">${h(t.sup||'')}</td>
         <td class="tdt">${fd(t.start)}</td>
         <td class="tdt${over?' ov':''}">${fd(t.deadline)}${over?' ！':''}</td>
         <td><span class="chip ${sc(t.status)}" onclick="cycFT('${p.id}','${t.id}',event)">${si(t.status)?si(t.status)+' ':''}${sl(t.status)}</span></td>
         <td class="tnote">${t.note?h(t.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="openEditFT('${p.id}','${t.id}')">+ メモ</span>`}</td>
         <td class="tby">${h(t._by||'')}</td>
-        <td><div class="ta"><button class="ib" onclick="openEditFT('${p.id}','${t.id}')">編集</button><button class="ib del" onclick="delFT('${p.id}','${t.id}')">削除</button></div></td>
+        <td><div class="ta"><button class="ib" onclick="openEditFT('${p.id}','${t.id}')">編集</button><button class="ib" onclick="dupFT('${p.id}','${t.id}',event)">複製</button><button class="ib del" onclick="delFT('${p.id}','${t.id}')">削除</button></div></td>
       </tr>`;
       for(let j=1;j<span;j++){
         const tj=tasks[i2+j];const overj=isOver(tj.deadline)&&tj.status!=='DONE';
-        rows+=`<tr class="tr" id="frow-${tj.id}">
-          <td class="tn">${h(tj.name)}</td><td class="tres">${h(tj.res||'—')}</td>
+        rows+=`<tr class="tr" id="frow-${tj.id}" draggable="true" data-dtype="ft" data-scope="${p.id}" data-tid="${tj.id}" ondragstart="dgRowStart(event)" ondragover="dgOver(event)" ondragleave="dgLeave(event)" ondrop="dgRowDrop(event)" ondragend="dgEnd(event)">
+          <td class="tn"><div style="display:flex;align-items:center;gap:4px"><span class="drag-handle">⠿</span>${h(tj.name)}</div></td><td class="tres">${h(tj.res||'—')}</td><td class="tsup">${h(tj.sup||'')}</td>
           <td class="tdt">${fd(tj.start)}</td>
           <td class="tdt${overj?' ov':''}">${fd(tj.deadline)}${overj?' ！':''}</td>
           <td><span class="chip ${sc(tj.status)}" onclick="cycFT('${p.id}','${tj.id}',event)">${si(tj.status)?si(tj.status)+' ':''}${sl(tj.status)}</span></td>
           <td class="tnote">${tj.note?h(tj.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="openEditFT('${p.id}','${tj.id}')">+ メモ</span>`}</td>
           <td class="tby">${h(tj._by||'')}</td>
-          <td><div class="ta"><button class="ib" onclick="openEditFT('${p.id}','${tj.id}')">編集</button><button class="ib del" onclick="delFT('${p.id}','${tj.id}')">削除</button></div></td>
+          <td><div class="ta"><button class="ib" onclick="openEditFT('${p.id}','${tj.id}')">編集</button><button class="ib" onclick="dupFT('${p.id}','${tj.id}',event)">複製</button><button class="ib del" onclick="delFT('${p.id}','${tj.id}')">削除</button></div></td>
         </tr>`;
       }
       i2+=span;
     }
-    const emptyRow=tasks.length?'':`<tr><td colspan="9" style="padding:16px;text-align:center;font-size:11px;color:var(--faint)">タスクなし。追加してください。</td></tr>`;
+    const emptyRow=tasks.length?'':`<tr><td colspan="10" style="padding:16px;text-align:center;font-size:11px;color:var(--faint)">タスクなし。追加してください。</td></tr>`;
     return `<div class="kpi-block" style="margin-top:12px">
       <div class="kpi-head" onclick="togK('ap-${p.id}')">
         <div class="kpi-idx" style="color:${p.color||c};font-size:22px;width:64px">PJT</div>
@@ -1274,9 +1305,9 @@ function renderAreaProjects(areaId,areaColor){
       </div>
       <div class="kpi-body open" id="kb-ap-${p.id}">
         <table class="tt">
-          <thead><tr><th style="width:100px">グループ</th><th>タスク名</th><th>担当者</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:150px">備考</th><th>記入者</th><th></th></tr></thead>
+          <thead><tr><th style="width:100px">グループ</th><th>タスク名</th><th>担当者</th><th>sup</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:150px">備考</th><th>記入者</th><th></th></tr></thead>
           <tbody>${rows}${emptyRow}</tbody>
-          <tfoot><tr class="add-r"><td colspan="9"><button class="add-btn" onclick="openAddFreeTaskInArea('${p.id}')">+ タスクを追加...</button></td></tr></tfoot>
+          <tfoot><tr class="add-r"><td colspan="10"><button class="add-btn" onclick="openAddFreeTaskInArea('${p.id}')">+ タスクを追加...</button></td></tr></tfoot>
         </table>
       </div>
     </div>`;
@@ -1325,31 +1356,34 @@ function rFreeProject(id){
     const t=tasks[i2];const grp=t.group||'';
     let span=1;if(grp){while(i2+span<tasks.length&&tasks[i2+span].group===grp)span++;}
     const over=isOver(t.deadline)&&t.status!=='DONE';
-    rows+=`<tr class="tr" id="frow-${t.id}">
-      <td class="group-cell${grp?'':' empty'}" rowspan="${span}">${grp?`<span class="group-cell-label" style="border-left:3px solid ${c}">${h(grp)}</span>`:''}</td>
-      <td class="tn">${h(t.name)}</td><td class="tres">${h(t.res||'—')}</td>
+    const grpCell=grp
+      ?`<td class="group-cell" rowspan="${span}" draggable="true" data-dtype="ft" data-scope="${proj.id}" data-grp="${h(grp)}" ondragstart="dgGrpStart(event)" ondragover="dgOver(event)" ondragleave="dgLeave(event)" ondrop="dgGrpDrop(event)" ondragend="dgEnd(event)"><span class="group-cell-label" style="border-left:3px solid ${c}"><span class="drag-handle">⠿</span>${h(grp)}</span><div style="margin-top:4px;display:flex;gap:3px"><button class="ib" style="font-size:9px;padding:2px 6px" onclick="dupFTGroup('${proj.id}','${h(grp)}',event)">大タスク複製</button></div></td>`
+      :`<td class="group-cell empty" rowspan="${span}"></td>`;
+    rows+=`<tr class="tr" id="frow-${t.id}" draggable="true" data-dtype="ft" data-scope="${proj.id}" data-tid="${t.id}" ondragstart="dgRowStart(event)" ondragover="dgOver(event)" ondragleave="dgLeave(event)" ondrop="dgRowDrop(event)" ondragend="dgEnd(event)">
+      ${grpCell}
+      <td class="tn"><div style="display:flex;align-items:center;gap:4px"><span class="drag-handle">⠿</span>${h(t.name)}</div></td><td class="tres">${h(t.res||'—')}</td><td class="tsup">${h(t.sup||'')}</td>
       <td class="tdt">${fd(t.start)}</td>
       <td class="tdt${over?' ov':''}">${fd(t.deadline)}${over?' ！':''}</td>
       <td><span class="chip ${sc(t.status)}" onclick="cycFT('${proj.id}','${t.id}',event)">${si(t.status)?si(t.status)+' ':''}${sl(t.status)}</span></td>
       <td class="tnote">${t.note?h(t.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="openEditFT('${proj.id}','${t.id}')">+ メモ</span>`}</td>
       <td class="tby">${h(t._by||'')}</td>
-      <td><div class="ta"><button class="ib" onclick="openEditFT('${proj.id}','${t.id}')">編集</button><button class="ib del" onclick="delFT('${proj.id}','${t.id}')">削除</button></div></td>
+      <td><div class="ta"><button class="ib" onclick="openEditFT('${proj.id}','${t.id}')">編集</button><button class="ib" onclick="dupFT('${proj.id}','${t.id}',event)">複製</button><button class="ib del" onclick="delFT('${proj.id}','${t.id}')">削除</button></div></td>
     </tr>`;
     for(let j=1;j<span;j++){
       const tj=tasks[i2+j];const overj=isOver(tj.deadline)&&tj.status!=='DONE';
-      rows+=`<tr class="tr" id="frow-${tj.id}">
-        <td class="tn">${h(tj.name)}</td><td class="tres">${h(tj.res||'—')}</td>
+      rows+=`<tr class="tr" id="frow-${tj.id}" draggable="true" data-dtype="ft" data-scope="${proj.id}" data-tid="${tj.id}" ondragstart="dgRowStart(event)" ondragover="dgOver(event)" ondragleave="dgLeave(event)" ondrop="dgRowDrop(event)" ondragend="dgEnd(event)">
+        <td class="tn"><div style="display:flex;align-items:center;gap:4px"><span class="drag-handle">⠿</span>${h(tj.name)}</div></td><td class="tres">${h(tj.res||'—')}</td><td class="tsup">${h(tj.sup||'')}</td>
         <td class="tdt">${fd(tj.start)}</td>
         <td class="tdt${overj?' ov':''}">${fd(tj.deadline)}${overj?' ！':''}</td>
         <td><span class="chip ${sc(tj.status)}" onclick="cycFT('${proj.id}','${tj.id}',event)">${si(tj.status)?si(tj.status)+' ':''}${sl(tj.status)}</span></td>
         <td class="tnote">${tj.note?h(tj.note).replace(/\n/g,'<br>'):`<span class="tnote-empty" onclick="openEditFT('${proj.id}','${tj.id}')">+ メモ</span>`}</td>
         <td class="tby">${h(tj._by||'')}</td>
-        <td><div class="ta"><button class="ib" onclick="openEditFT('${proj.id}','${tj.id}')">編集</button><button class="ib del" onclick="delFT('${proj.id}','${tj.id}')">削除</button></div></td>
+        <td><div class="ta"><button class="ib" onclick="openEditFT('${proj.id}','${tj.id}')">編集</button><button class="ib" onclick="dupFT('${proj.id}','${tj.id}',event)">複製</button><button class="ib del" onclick="delFT('${proj.id}','${tj.id}')">削除</button></div></td>
       </tr>`;
     }
     i2+=span;
   }
-  const emptyRow=tasks.length?'':`<tr><td colspan="9" style="padding:20px 16px;text-align:center;font-size:11px;color:var(--faint)">タスクがありません。「+ タスク追加」から追加してください。</td></tr>`;
+  const emptyRow=tasks.length?'':`<tr><td colspan="10" style="padding:20px 16px;text-align:center;font-size:11px;color:var(--faint)">タスクがありません。「+ タスク追加」から追加してください。</td></tr>`;
   document.getElementById('ct').innerHTML=`
     ${fbar}
     <div style="background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden">
@@ -1364,9 +1398,9 @@ function rFreeProject(id){
         </div>
       </div>
       <table class="tt">
-        <thead><tr><th style="width:100px">グループ</th><th>タスク名</th><th>担当者</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:150px">備考</th><th>記入者</th><th></th></tr></thead>
+        <thead><tr><th style="width:100px">グループ</th><th>タスク名</th><th>担当者</th><th>sup</th><th>開始日</th><th>締め切り</th><th>ステータス</th><th style="width:150px">備考</th><th>記入者</th><th></th></tr></thead>
         <tbody>${rows}${emptyRow}</tbody>
-        <tfoot><tr class="add-r"><td colspan="9"><button class="add-btn" onclick="openAddFreeTask()">+ タスクを追加...</button></td></tr></tfoot>
+        <tfoot><tr class="add-r"><td colspan="10"><button class="add-btn" onclick="openAddFreeTask()">+ タスクを追加...</button></td></tr></tfoot>
       </table>
     </div>`;
 }
@@ -1408,7 +1442,7 @@ function openAdd(aId,kId){
   editing=null;
   document.getElementById('mttl').textContent='タスク追加';
   document.getElementById('task-del-btn').style.display='none';
-  ['fn','fr','fs2','fd','fnote'].forEach(id=>document.getElementById(id).value='');
+  ['fn','fr','fsup','fs2','fd','fnote'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('fg-input').value='';
   document.getElementById('fst').value='NOT_STARTED';
   document.getElementById('fpri').value='';
@@ -1428,6 +1462,7 @@ function openEdit(aId,kId,tId){
   document.getElementById('fg-input').value=t.group||'';
   document.getElementById('fnote').value=t.note||'';
   document.getElementById('fr').value=t.res||'';
+  document.getElementById('fsup').value=t.sup||'';
   document.getElementById('fs2').value=t.start||'';
   document.getElementById('fd').value=t.deadline||'';
   document.getElementById('fst').value=t.status;
@@ -1457,6 +1492,7 @@ function saveT(){
   const obj={
     name,group:(document.getElementById('fg-input')?.value||'').trim(),
     res:document.getElementById('fr').value.trim(),
+    sup:document.getElementById('fsup').value.trim(),
     start:document.getElementById('fs2').value,deadline:document.getElementById('fd').value,
     status:document.getElementById('fst').value,note:(document.getElementById('fnote')?.value||'').trim(),
     priority:document.getElementById('fpri').value||'',
@@ -1529,7 +1565,7 @@ function addSubTask(aId,kId,tId,e){
   _subModal={aId,kId,tId,chId:null};
   document.getElementById('sub-mttl').textContent='サブタスク追加';
   document.getElementById('sub-del-btn').style.display='none';
-  ['sub-fn','sub-res','sub-start','sub-deadline'].forEach(id=>document.getElementById(id).value='');
+  ['sub-fn','sub-res','sub-sup','sub-start','sub-deadline'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('sub-pri').value='';
   document.getElementById('sub-status').value='NOT_STARTED';
   document.getElementById('ov-sub').classList.add('open');
@@ -1544,6 +1580,7 @@ function openEditSub(aId,kId,tId,chId){
   document.getElementById('sub-del-btn').style.display='';
   document.getElementById('sub-fn').value=ch.name||'';
   document.getElementById('sub-res').value=ch.res||'';
+  document.getElementById('sub-sup').value=ch.sup||'';
   document.getElementById('sub-start').value=ch.start||'';
   document.getElementById('sub-deadline').value=ch.deadline||'';
   document.getElementById('sub-pri').value=ch.priority||'';
@@ -1556,7 +1593,7 @@ function saveSub(){
   if(!_subModal)return;
   const name=document.getElementById('sub-fn').value.trim();
   if(!name){toast('タスク名を入力してください','err');return;}
-  const obj={name,res:document.getElementById('sub-res').value.trim(),start:document.getElementById('sub-start').value,deadline:document.getElementById('sub-deadline').value,priority:document.getElementById('sub-pri').value||'',status:document.getElementById('sub-status').value,_by:currentUser?.displayName||currentUser?.email||''};
+  const obj={name,res:document.getElementById('sub-res').value.trim(),sup:document.getElementById('sub-sup').value.trim(),start:document.getElementById('sub-start').value,deadline:document.getElementById('sub-deadline').value,priority:document.getElementById('sub-pri').value||'',status:document.getElementById('sub-status').value,_by:currentUser?.displayName||currentUser?.email||''};
   const{aId,kId,tId,chId}=_subModal;
   const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId),t=k.tasks.find(x=>x.id===tId);
   if(!t.children)t.children=[];
@@ -1784,7 +1821,7 @@ function openAddFreeTask(){
   editingFT=null;
   document.getElementById('ft-mttl').textContent='タスク追加';
   document.getElementById('ft-del-btn').style.display='none';
-  ['ft-name','ft-res','ft-start','ft-deadline','ft-note','ft-group'].forEach(id=>document.getElementById(id).value='');
+  ['ft-name','ft-res','ft-sup','ft-start','ft-deadline','ft-note','ft-group'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('ft-status').value='NOT_STARTED';
   const targetId=window._ftTargetProjId||fpid;
   if(targetId){const p=D.freeProjects.find(x=>x.id===targetId);const gs=[...new Set(p.tasks.map(t=>t.group||'').filter(Boolean))];document.getElementById('ft-group-list').innerHTML=gs.map(g=>`<option value="${h(g)}">`).join('');}
@@ -1800,6 +1837,7 @@ function openEditFT(pId,tId){
   document.getElementById('ft-name').value=t.name;
   document.getElementById('ft-group').value=t.group||'';
   document.getElementById('ft-res').value=t.res||'';
+  document.getElementById('ft-sup').value=t.sup||'';
   document.getElementById('ft-start').value=t.start||'';
   document.getElementById('ft-deadline').value=t.deadline||'';
   document.getElementById('ft-note').value=t.note||'';
@@ -1812,7 +1850,7 @@ function openEditFT(pId,tId){
 function closeMFT(){document.getElementById('ov-ft').classList.remove('open');editingFT=null;}
 function saveFT(){
   const name=document.getElementById('ft-name').value.trim();if(!name){toast('タスク名を入力してください','err');return;}
-  const obj={name,group:document.getElementById('ft-group').value.trim(),res:document.getElementById('ft-res').value.trim(),start:document.getElementById('ft-start').value,deadline:document.getElementById('ft-deadline').value,note:document.getElementById('ft-note').value.trim(),status:document.getElementById('ft-status').value,_by:currentUser?.displayName||currentUser?.email||''};
+  const obj={name,group:document.getElementById('ft-group').value.trim(),res:document.getElementById('ft-res').value.trim(),sup:document.getElementById('ft-sup').value.trim(),start:document.getElementById('ft-start').value,deadline:document.getElementById('ft-deadline').value,note:document.getElementById('ft-note').value.trim(),status:document.getElementById('ft-status').value,_by:currentUser?.displayName||currentUser?.email||''};
   if(editingFT){
     const proj=D.freeProjects.find(x=>x.id===editingFT.pId);
     const ti=proj.tasks.findIndex(x=>x.id===editingFT.tId);
@@ -1848,6 +1886,142 @@ function delFT(pId,tId,skipConfirm){
   if(proj.areaId&&aid===proj.areaId)rArea(aid);
   else if(fpid)rFreeProject(fpid);
   else rDash();
+}
+
+// ── DUPLICATE ──
+function dupTask(aId,kId,tId,e){
+  if(e)e.stopPropagation();
+  const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
+  const ti=k.tasks.findIndex(x=>x.id===tId);if(ti<0)return;
+  const orig=k.tasks[ti];
+  const copy={...JSON.parse(JSON.stringify(orig)),id:gid(),name:orig.name+'(コピー)',status:'NOT_STARTED',children:[]};
+  k.tasks.splice(ti+1,0,copy);
+  save();buildNav();rArea(aId);
+  logAction('dup',`「${orig.name}」を複製`);toast('複製しました。編集ボタンで内容を変更できます');
+}
+function dupGroup(aId,kId,grp,e){
+  if(e)e.stopPropagation();
+  const a=D.areas.find(x=>x.id===aId),k=a.kpis.find(x=>x.id===kId);
+  const members=k.tasks.filter(t=>t.group===grp);if(!members.length)return;
+  const copies=members.map(t=>({...JSON.parse(JSON.stringify(t)),id:gid(),name:t.name+'(コピー)',status:'NOT_STARTED',children:[]}));
+  k.tasks.push(...copies);
+  save();buildNav();rArea(aId);
+  logAction('dup',`大タスク「${grp}」を複製`);toast(`「${grp}」を大タスクごと複製しました`);
+}
+function dupFT(pId,tId,e){
+  if(e)e.stopPropagation();
+  const proj=D.freeProjects.find(x=>x.id===pId);if(!proj)return;
+  const ti=proj.tasks.findIndex(x=>x.id===tId);if(ti<0)return;
+  const orig=proj.tasks[ti];
+  const copy={...JSON.parse(JSON.stringify(orig)),id:gid(),name:orig.name+'(コピー)',status:'NOT_STARTED'};
+  proj.tasks.splice(ti+1,0,copy);
+  save();buildNav();
+  if(proj.areaId&&aid===proj.areaId)rArea(aid);else if(fpid)rFreeProject(fpid);
+  logAction('dup',`[${proj.name}] 「${orig.name}」を複製`);toast('複製しました。編集ボタンで内容を変更できます');
+}
+function dupFTGroup(pId,grp,e){
+  if(e)e.stopPropagation();
+  const proj=D.freeProjects.find(x=>x.id===pId);if(!proj)return;
+  const members=proj.tasks.filter(t=>t.group===grp);if(!members.length)return;
+  const copies=members.map(t=>({...JSON.parse(JSON.stringify(t)),id:gid(),name:t.name+'(コピー)',status:'NOT_STARTED'}));
+  proj.tasks.push(...copies);
+  save();buildNav();
+  if(proj.areaId&&aid===proj.areaId)rArea(aid);else if(fpid)rFreeProject(fpid);
+  logAction('dup',`[${proj.name}] 大タスク「${grp}」を複製`);toast(`「${grp}」を大タスクごと複製しました`);
+}
+
+// ── DRAG & DROP ──
+let _dg={type:null,scope:null,kid:null,tid:null,grp:null};
+function dgRowStart(e){
+  const d=e.currentTarget.dataset;
+  _dg={type:d.dtype,scope:d.scope,kid:d.kid||null,tid:d.tid,grp:null};
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+}
+function dgGrpStart(e){
+  const d=e.currentTarget.dataset;
+  _dg={type:d.dtype,scope:d.scope,kid:d.kid||null,tid:null,grp:d.grp};
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed='move';
+}
+function dgOver(e){
+  e.preventDefault();e.dataTransfer.dropEffect='move';
+  e.currentTarget.classList.add('drag-over');
+}
+function dgLeave(e){e.currentTarget.classList.remove('drag-over');}
+function dgEnd(e){
+  document.querySelectorAll('.dragging').forEach(el=>el.classList.remove('dragging'));
+  document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'));
+}
+function dgRowDrop(e){
+  e.preventDefault();e.stopPropagation();
+  const target=e.currentTarget;target.classList.remove('drag-over');
+  const td=target.dataset;
+  if(!_dg.tid&&!_dg.grp)return;
+  // Same scope only
+  if(_dg.scope!==td.scope){toast('別エリア間の移動は未対応です','err');dgEnd(e);return;}
+  if(_dg.type==='kpi'){
+    const a=D.areas.find(x=>x.id===_dg.scope),k=a.kpis.find(x=>x.id===_dg.kid);
+    if(!k)return;
+    if(_dg.tid){
+      // single row move
+      const fromI=k.tasks.findIndex(x=>x.id===_dg.tid);
+      const toI=k.tasks.findIndex(x=>x.id===td.tid);
+      if(fromI<0||toI<0||fromI===toI)return;
+      const[item]=k.tasks.splice(fromI,1);
+      k.tasks.splice(toI,0,item);
+    } else {
+      // group move — move all group members before target task
+      const toI=k.tasks.findIndex(x=>x.id===td.tid);if(toI<0)return;
+      const members=k.tasks.filter(t=>t.group===_dg.grp);
+      k.tasks=k.tasks.filter(t=>t.group!==_dg.grp);
+      const insertAt=k.tasks.findIndex(x=>x.id===td.tid);
+      k.tasks.splice(insertAt>=0?insertAt:k.tasks.length,0,...members);
+    }
+    save();buildNav();rArea(_dg.scope);
+  } else if(_dg.type==='ft'){
+    const proj=D.freeProjects.find(x=>x.id===_dg.scope);if(!proj)return;
+    if(_dg.tid){
+      const fromI=proj.tasks.findIndex(x=>x.id===_dg.tid);
+      const toI=proj.tasks.findIndex(x=>x.id===td.tid);
+      if(fromI<0||toI<0||fromI===toI)return;
+      const[item]=proj.tasks.splice(fromI,1);
+      proj.tasks.splice(toI,0,item);
+    } else {
+      const members=proj.tasks.filter(t=>t.group===_dg.grp);
+      proj.tasks=proj.tasks.filter(t=>t.group!==_dg.grp);
+      const insertAt=proj.tasks.findIndex(x=>x.id===td.tid);
+      proj.tasks.splice(insertAt>=0?insertAt:proj.tasks.length,0,...members);
+    }
+    save();buildNav();
+    if(proj.areaId&&aid===proj.areaId)rArea(aid);else if(fpid)rFreeProject(fpid);
+  }
+  _dg={type:null,scope:null,kid:null,tid:null,grp:null};
+}
+function dgGrpDrop(e){
+  e.preventDefault();e.stopPropagation();
+  const target=e.currentTarget;target.classList.remove('drag-over');
+  const td=target.dataset;
+  if(!_dg.grp||_dg.grp===td.grp)return;
+  if(_dg.scope!==td.scope){toast('別エリア間の移動は未対応です','err');dgEnd(e);return;}
+  if(_dg.type==='kpi'){
+    const a=D.areas.find(x=>x.id===_dg.scope),k=a.kpis.find(x=>x.id===_dg.kid);if(!k)return;
+    const members=k.tasks.filter(t=>t.group===_dg.grp);
+    k.tasks=k.tasks.filter(t=>t.group!==_dg.grp);
+    // Insert before the target group's first task
+    const insertAt=k.tasks.findIndex(t=>t.group===td.grp);
+    k.tasks.splice(insertAt>=0?insertAt:k.tasks.length,0,...members);
+    save();buildNav();rArea(_dg.scope);
+  } else if(_dg.type==='ft'){
+    const proj=D.freeProjects.find(x=>x.id===_dg.scope);if(!proj)return;
+    const members=proj.tasks.filter(t=>t.group===_dg.grp);
+    proj.tasks=proj.tasks.filter(t=>t.group!==_dg.grp);
+    const insertAt=proj.tasks.findIndex(t=>t.group===td.grp);
+    proj.tasks.splice(insertAt>=0?insertAt:proj.tasks.length,0,...members);
+    save();buildNav();
+    if(proj.areaId&&aid===proj.areaId)rArea(aid);else if(fpid)rFreeProject(fpid);
+  }
+  _dg={type:null,scope:null,kid:null,tid:null,grp:null};
 }
 
 // ── GANTT ──
