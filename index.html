@@ -346,6 +346,47 @@ option{background:var(--white);}
 .dl-banner-close{background:none;border:none;color:#92400E;cursor:pointer;font-size:18px;opacity:.4;padding:0;flex-shrink:0;line-height:1;}
 .dl-banner-close:hover{opacity:1;}
 
+/* ── AREA TABS ── */
+.area-tabs{display:flex;gap:2px;margin-bottom:16px;background:var(--bg2);border-radius:7px;padding:3px;width:fit-content;}
+.area-tab{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 18px;border-radius:5px;border:none;cursor:pointer;background:transparent;color:var(--dim);transition:all .12s;}
+.area-tab.active{background:var(--white);color:var(--dark);box-shadow:0 1px 4px rgba(46,49,56,.1);}
+
+/* ── WEEKLY TODO ── */
+.wt-wrap{display:flex;flex-direction:column;gap:10px;}
+.wt-week{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.wt-week.current{border-color:var(--aiesec);box-shadow:0 0 0 2px rgba(3,126,243,.12);}
+.wt-week-head{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background .08s;}
+.wt-week-head:hover{background:var(--bg);}
+.wt-week-lbl{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.06em;line-height:1;}
+.wt-week-range{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);}
+.wt-week-badge{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-left:2px;}
+.wt-week-badge.now{background:rgba(3,126,243,.12);color:var(--aiesec);}
+.wt-week-stats{margin-left:auto;font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);display:flex;align-items:center;gap:8px;}
+.wt-week-pct{font-family:'Bebas Neue',sans-serif;font-size:16px;}
+.wt-week-chev{font-size:16px;color:var(--faint);transition:transform .12s;}
+.wt-week-chev.open{transform:rotate(90deg);}
+.wt-body{display:none;padding:8px 0;}
+.wt-body.open{display:block;}
+.wt-item{display:flex;align-items:flex-start;gap:10px;padding:7px 16px;border-bottom:1px solid var(--border);transition:background .07s;}
+.wt-item:last-child{border-bottom:none;}
+.wt-item:hover{background:var(--bg);}
+.wt-item:hover .wt-actions{opacity:1;}
+.wt-cb{width:16px;height:16px;border:1.5px solid var(--border);border-radius:3px;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all .1s;}
+.wt-cb.done{background:var(--done);border-color:var(--done);}
+.wt-cb-check{font-size:10px;color:#fff;font-weight:900;line-height:1;}
+.wt-main{flex:1;min-width:0;}
+.wt-name{font-size:13px;font-weight:700;color:var(--dark);line-height:1.4;}
+.wt-name.done{text-decoration:line-through;color:var(--dim);}
+.wt-meta{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap;}
+.wt-res{font-size:10px;font-weight:700;color:var(--dim);}
+.wt-sup{font-size:10px;color:var(--faint);}
+.wt-note{font-size:11px;color:var(--dim);margin-top:3px;line-height:1.4;}
+.wt-actions{display:flex;gap:3px;opacity:0;transition:opacity .08s;flex-shrink:0;}
+.wt-add{display:flex;align-items:center;padding:6px 16px;}
+.wt-add-btn{font-size:11px;font-weight:700;color:var(--faint);text-transform:uppercase;letter-spacing:.1em;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:color .08s;background:none;border:none;}
+.wt-add-btn:hover{color:var(--text);}
+.wt-empty{padding:12px 16px;font-size:11px;color:var(--faint);font-style:italic;}
+
 /* ── SYNC INDICATOR ── */
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--faint);display:inline-block;margin-left:6px;transition:background .3s;}
 .sync-dot.syncing{background:#F48924;animation:pulse .8s infinite;}
@@ -613,6 +654,26 @@ option{background:var(--white);}
 </div>
 </div>
 
+<!-- WEEKLY TODO MODAL -->
+<div class="overlay" id="ov-wt">
+<div class="modal" style="width:460px">
+  <div class="mh" id="wt-mttl">Todo 追加</div>
+  <div class="mb">
+    <div class="fg"><label class="fl2">タスク名</label><input class="fi" id="wt-name" placeholder="今週やること..."></div>
+    <div class="fr2">
+      <div class="fg"><label class="fl2">担当者</label><input class="fi" id="wt-res" placeholder="名前..."></div>
+      <div class="fg"><label class="fl2">sup</label><input class="fi" id="wt-sup" placeholder="サポート..."></div>
+    </div>
+    <div class="fg"><label class="fl2">メモ</label><textarea class="fi" id="wt-note" rows="2" placeholder="備考・リンクなど..."></textarea></div>
+  </div>
+  <div class="mf">
+    <button class="btn" id="wt-del-btn" style="margin-right:auto;display:none;color:var(--danger);border-color:var(--danger)" onclick="delWT()">削除</button>
+    <button class="btn" onclick="closeMWT()">キャンセル</button>
+    <button class="btn btn-fill" onclick="saveWT()">保存</button>
+  </div>
+</div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════════════════════
 //  FIREBASE CONFIG
@@ -823,6 +884,7 @@ const SEED={areas:[
 ],freeProjects:[]};
 
 let D, view='dashboard', aid=null, fpid=null, fil='ALL', gfil='ALL', editing=null, editingKpi=null, editingProj=null, editingFT=null;
+let _areaTabs={}; // aId -> 'wbs' | 'weekly'
 
 function load(){
   try{const s=localStorage.getItem(SK);if(s){D=JSON.parse(s);migrate();return;}}catch(e){}
@@ -830,13 +892,16 @@ function load(){
 }
 function migrate(){
   if(!D.freeProjects)D.freeProjects=[];
-  D.areas.forEach(a=>a.kpis.forEach(k=>k.tasks.forEach(t=>{
-    if(!t.group)t.group='';
-    if(!t.children)t.children=[];
-    if(!('priority' in t))t.priority='';
-    if(!('sup' in t))t.sup='';
-    t.children.forEach(ch=>{if(!('priority' in ch))ch.priority='';if(!('sup' in ch))ch.sup='';});;
-  })));
+  D.areas.forEach(a=>{
+    if(!a.weekTodos)a.weekTodos=[];
+    a.kpis.forEach(k=>k.tasks.forEach(t=>{
+      if(!t.group)t.group='';
+      if(!t.children)t.children=[];
+      if(!('priority' in t))t.priority='';
+      if(!('sup' in t))t.sup='';
+      t.children.forEach(ch=>{if(!('priority' in ch))ch.priority='';if(!('sup' in ch))ch.sup='';});
+    }));
+  });
   D.freeProjects.forEach(p=>{
     if(!p.tasks)p.tasks=[];
     if(!('areaId' in p))p.areaId=null;
@@ -1176,7 +1241,18 @@ function subRows(t,aId,kId,c){
 
 function rArea(id){
   const area=D.areas.find(a=>a.id===id);if(!area)return;
-  const s=aStats(area);const c=COLORS[id]||'#52565E';
+  const c=COLORS[id]||'#52565E';
+  const tab=_areaTabs[id]||'wbs';
+  const tabBar=`<div class="area-tabs">
+    <button class="area-tab${tab==='wbs'?' active':''}" onclick="_areaTabs['${id}']='wbs';rArea('${id}')">WBS / KPI</button>
+    <button class="area-tab${tab==='weekly'?' active':''}" onclick="_areaTabs['${id}']='weekly';rArea('${id}')">週次 Todo</button>
+  </div>`;
+  if(tab==='weekly'){
+    document.getElementById('ct').innerHTML=tabBar+rWeekTodo(id,c);
+    return;
+  }
+  // ── WBS tab ──
+  const s=aStats(area);
   const q=document.getElementById('si').value.toLowerCase();
   const fbar=`<div class="fbar">
     <span class="fl">Filter</span>
@@ -1233,7 +1309,7 @@ function rArea(id){
       </div>
     </div>`;
   }).join('');
-  document.getElementById('ct').innerHTML=fbar+kpis+`<div style="margin-top:4px"><button class="add-btn" style="font-size:12px;padding:10px 0" onclick="openAddKpi('${area.id}')">+ KPI を追加...</button></div>`+renderAreaProjects(area.id,c);
+  document.getElementById('ct').innerHTML=tabBar+fbar+kpis+`<div style="margin-top:4px"><button class="add-btn" style="font-size:12px;padding:10px 0" onclick="openAddKpi('${area.id}')">+ KPI を追加...</button></div>`+renderAreaProjects(area.id,c);
   const allTids=[];
   area.kpis.forEach(k=>k.tasks.forEach(t=>{allTids.push(t.id);(t.children||[]).forEach(c=>allTids.push(c.id));}));
   if(allTids.length)loadCommentCounts(allTids).then(()=>{
@@ -1888,6 +1964,167 @@ function delFT(pId,tId,skipConfirm){
   else rDash();
 }
 
+// ── WEEKLY TODO ──
+// Generate week start dates (Monday) from 2026-02-02 to 2026-09-28
+function wtWeeks(){
+  const weeks=[];
+  let d=new Date(2026,1,2); // Feb 2, 2026 (Monday)
+  const end=new Date(2026,8,28);
+  while(d<=end){
+    weeks.push(new Date(d));
+    d=new Date(d);d.setDate(d.getDate()+7);
+  }
+  return weeks;
+}
+function wtWeekKey(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${dd}`;
+}
+function wtWeekLabel(d){
+  const sun=new Date(d);sun.setDate(d.getDate()+6);
+  return `${d.getMonth()+1}/${d.getDate()} 〜 ${sun.getMonth()+1}/${sun.getDate()}`;
+}
+function wtIsCurrentWeek(d){
+  const today=new Date();
+  const sun=new Date(d);sun.setDate(d.getDate()+6);sun.setHours(23,59,59);
+  return today>=d&&today<=sun;
+}
+function wtIsPast(d){
+  const sun=new Date(d);sun.setDate(d.getDate()+6);sun.setHours(23,59,59);
+  return new Date()>sun;
+}
+
+function rWeekTodo(aId,c){
+  const area=D.areas.find(a=>a.id===aId);if(!area)return'';
+  if(!area.weekTodos)area.weekTodos=[];
+  const weeks=wtWeeks();
+  const todayWk=weeks.find(w=>wtIsCurrentWeek(w));
+  const cards=weeks.map(w=>{
+    const key=wtWeekKey(w);
+    const todos=area.weekTodos.filter(t=>t.weekStart===key);
+    const done=todos.filter(t=>t.done).length;
+    const past=wtIsPast(w);
+    const isCurrent=wtIsCurrentWeek(w);
+    const isOpen=isCurrent||(!past&&todos.length>0);
+    const todoItems=todos.map(t=>`
+      <div class="wt-item" id="wtrow-${t.id}">
+        <div class="wt-cb${t.done?' done':''}" onclick="togWT('${aId}','${t.id}')">${t.done?'<span class="wt-cb-check">✓</span>':''}</div>
+        <div class="wt-main">
+          <div class="wt-name${t.done?' done':''}">${h(t.name)}</div>
+          ${(t.res||t.sup)?`<div class="wt-meta">${t.res?`<span class="wt-res">${h(t.res)}</span>`:''}${t.sup?`<span class="wt-sup">sup: ${h(t.sup)}</span>`:''}</div>`:''}
+          ${t.note?`<div class="wt-note">${h(t.note).replace(/\n/g,'<br>')}</div>`:''}
+        </div>
+        <div class="wt-actions">
+          <button class="ib" onclick="openEditWT('${aId}','${t.id}')">編集</button>
+          <button class="ib del" onclick="delWT('${aId}','${t.id}')">削除</button>
+        </div>
+      </div>`).join('');
+    const emptyMsg=todos.length===0?`<div class="wt-empty">Todoなし</div>`:'';
+    const weekNum=weeks.indexOf(w)+1;
+    return `<div class="wt-week${isCurrent?' current':''}">
+      <div class="wt-week-head" onclick="togWTWeek('${key}')">
+        <div>
+          <div class="wt-week-lbl" style="color:${isCurrent?c:'var(--dark)'}">${weekNum}週目</div>
+          <div class="wt-week-range">${wtWeekLabel(w)}</div>
+        </div>
+        ${isCurrent?`<span class="wt-week-badge now">今週</span>`:past?'':''}
+        <div class="wt-week-stats">
+          <span>${done}/${todos.length} 完了</span>
+          ${todos.length?`<span class="wt-week-pct" style="color:${c}">${Math.round(done/todos.length*100)}%</span>`:''}
+        </div>
+        <div class="wt-week-chev${isOpen?' open':''}" id="wtchev-${key}">›</div>
+      </div>
+      <div class="wt-body${isOpen?' open':''}" id="wtbody-${key}">
+        ${todoItems}${emptyMsg}
+        <div class="wt-add"><button class="wt-add-btn" onclick="openAddWT('${aId}','${key}')">+ Todo 追加...</button></div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="wt-wrap">${cards}</div>`;
+}
+
+function togWTWeek(key){
+  const body=document.getElementById('wtbody-'+key);
+  const chev=document.getElementById('wtchev-'+key);
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(chev)chev.classList.toggle('open',open);
+}
+
+function togWT(aId,tId){
+  const area=D.areas.find(a=>a.id===aId);if(!area)return;
+  const t=area.weekTodos.find(x=>x.id===tId);if(!t)return;
+  t.done=!t.done;
+  save();
+  // Update DOM in place
+  const row=document.getElementById('wtrow-'+tId);
+  if(row){
+    const cb=row.querySelector('.wt-cb');
+    const nm=row.querySelector('.wt-name');
+    cb.classList.toggle('done',t.done);
+    cb.innerHTML=t.done?'<span class="wt-cb-check">✓</span>':'';
+    nm.classList.toggle('done',t.done);
+    // Update week stats
+    rWeekTodoStats(aId);
+  }
+  logAction(t.done?'done':'undone',`週次Todo「${t.name}」`);
+}
+function rWeekTodoStats(aId){
+  // Lightweight re-render of just the stats in each week head
+  // Full re-render is simplest
+  rArea(aId);
+}
+
+let _wtModal=null;
+function openAddWT(aId,weekKey){
+  _wtModal={aId,weekKey,tId:null};
+  document.getElementById('wt-mttl').textContent='Todo 追加';
+  document.getElementById('wt-del-btn').style.display='none';
+  ['wt-name','wt-res','wt-sup','wt-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ov-wt').classList.add('open');
+  setTimeout(()=>document.getElementById('wt-name').focus(),80);
+}
+function openEditWT(aId,tId){
+  const area=D.areas.find(a=>a.id===aId);if(!area)return;
+  const t=area.weekTodos.find(x=>x.id===tId);if(!t)return;
+  _wtModal={aId,weekKey:t.weekStart,tId};
+  document.getElementById('wt-mttl').textContent='Todo 編集';
+  document.getElementById('wt-del-btn').style.display='';
+  document.getElementById('wt-name').value=t.name||'';
+  document.getElementById('wt-res').value=t.res||'';
+  document.getElementById('wt-sup').value=t.sup||'';
+  document.getElementById('wt-note').value=t.note||'';
+  document.getElementById('ov-wt').classList.add('open');
+  setTimeout(()=>document.getElementById('wt-name').focus(),80);
+}
+function closeMWT(){document.getElementById('ov-wt').classList.remove('open');_wtModal=null;}
+function saveWT(){
+  if(!_wtModal)return;
+  const name=document.getElementById('wt-name').value.trim();
+  if(!name){toast('タスク名を入力してください','err');return;}
+  const obj={name,res:document.getElementById('wt-res').value.trim(),sup:document.getElementById('wt-sup').value.trim(),note:document.getElementById('wt-note').value.trim(),weekStart:_wtModal.weekKey,done:false,_by:currentUser?.displayName||currentUser?.email||''};
+  const area=D.areas.find(a=>a.id===_wtModal.aId);
+  if(!area.weekTodos)area.weekTodos=[];
+  if(_wtModal.tId){
+    const i=area.weekTodos.findIndex(x=>x.id===_wtModal.tId);
+    area.weekTodos[i]={...area.weekTodos[i],...obj,done:area.weekTodos[i].done};
+    logAction('edit',`週次Todo「${name}」を更新`);toast('更新しました');
+  } else {
+    area.weekTodos.push({id:gid(),...obj});
+    logAction('add',`週次Todo「${name}」を追加`);toast('追加しました');
+  }
+  save();closeMWT();rArea(_wtModal?.aId||aid);
+}
+function delWT(aId,tId){
+  if(_wtModal&&!aId){aId=_wtModal.aId;tId=_wtModal.tId;}
+  if(!aId||!tId){if(_wtModal){aId=_wtModal.aId;tId=_wtModal.tId;}else return;}
+  if(!confirm('削除しますか？'))return;
+  const area=D.areas.find(a=>a.id===aId);if(!area)return;
+  area.weekTodos=area.weekTodos.filter(x=>x.id!==tId);
+  save();closeMWT();rArea(aId);
+  logAction('del','週次Todoを削除');toast('削除しました');
+}
+
 // ── DUPLICATE ──
 function dupTask(aId,kId,tId,e){
   if(e)e.stopPropagation();
@@ -2131,12 +2368,12 @@ function importD(e){const f=e.target.files[0];if(!f)return;const r=new FileReade
 function toast(msg,t=''){const el=document.createElement('div');el.className='toast'+(t?' '+t:'');el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),2600);}
 
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeM();closeMKpi();closeMProj();closeMFT();}
+  if(e.key==='Escape'){closeM();closeMKpi();closeMProj();closeMFT();closeMWT();}
   if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();document.getElementById('si').focus();}
 });
-['ov','ov-kpi','ov-proj','ov-ft','ov-sub'].forEach(id=>{
+['ov','ov-kpi','ov-proj','ov-ft','ov-sub','ov-wt'].forEach(id=>{
   const el=document.getElementById(id);
-  if(el)el.addEventListener('click',function(e){if(e.target===this){closeM();closeMKpi();closeMProj();closeMFT();}});
+  if(el)el.addEventListener('click',function(e){if(e.target===this){closeM();closeMKpi();closeMProj();closeMFT();closeMWT();}});
 });
 
 // ══════════════════════════════════════════════════════════════
